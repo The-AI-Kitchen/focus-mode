@@ -20,18 +20,19 @@ function App() {
             outline: 'none',
           }}
         />
-        <div
+        <input
+          type="text"
+          placeholder="00:00:00"
           style={{
             width: '420px',
             padding: '18px 28px',
             borderRadius: '999px',
+            border: 'none',
             backgroundColor: '#c8c8c8',
             fontSize: '20px',
-            color: '#222',
+            outline: 'none',
           }}
-        >
-          00:00:00
-        </div>
+        />
       </div>
     </div>
   )
