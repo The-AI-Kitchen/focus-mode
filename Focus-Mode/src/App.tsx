@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import homePage from './assets/home-page.png'
 import confirmBtn from './assets/btn-confirm.png'
 import confirmBtnHover from './assets/btn-confirm-hover.png'
 import nextBtn from './assets/btn-next.png'
 import nextBtnHover from './assets/btn-next-hover.png'
+import Computer from './assets/Computer.png'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -64,8 +65,20 @@ function App() {
     if (e.key === 'Enter') handleAddLink()
   }
 
+  useEffect(() => {
+    document.body.style.backgroundColor = onNextPage ? '#0097b2' : ''
+  }, [onNextPage])
+
   if (onNextPage) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '24px'  }} />
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden' }}>
+        <img
+          src={Computer}
+          alt="Computer"
+          style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', maxWidth: '100%' }}
+        />
+      </div>
+    )
   }
 
   if (confirmed) {
