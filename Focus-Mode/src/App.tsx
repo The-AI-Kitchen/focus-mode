@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import homePage from './assets/Home-Page (1).png'
-import confirmBtn from './assets/Focus Mode Visual Layouts (2).png'
-import confirmBtnHover from './assets/Focus Mode Visual Layouts.png'
+import homePage from './assets/home-page.png'
+import confirmBtn from './assets/btn-confirm.png'
+import confirmBtnHover from './assets/btn-confirm-hover.png'
+import nextBtn from './assets/btn-next.png'
+import nextBtnHover from './assets/btn-next-hover.png'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -12,6 +14,7 @@ function App() {
   const [links, setLinks] = useState<LinkEntry[]>(getLinks)
   const [showLinks, setShowLinks] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [onNextPage, setOnNextPage] = useState(false)
 
   function formatTimerDigits(digits: string): string {
     const padded = digits.padStart(6, '0')
@@ -61,10 +64,13 @@ function App() {
     if (e.key === 'Enter') handleAddLink()
   }
 
+  if (onNextPage) {
+    return <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '24px'  }} />
+  }
+
   if (confirmed) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '24px' }}>
-        <p style={{ fontSize: '24px' }}>new page to be implemented soon!</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <p style={{ fontSize: '16px', fontWeight: 'bold', margin: 0 }}>timer inputted</p>
@@ -105,20 +111,30 @@ function App() {
           )}
         </div>
 
-        <button
-          onClick={() => setConfirmed(false)}
-          style={{
-            padding: '12px 32px',
-            borderRadius: '999px',
-            border: 'none',
-            backgroundColor: '#4a4a4a',
-            color: '#fff',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          Go Back
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={() => setConfirmed(false)}
+            style={{
+              padding: '12px 32px',
+              borderRadius: '999px',
+              border: 'none',
+              backgroundColor: '#4a4a4a',
+              color: '#fff',
+              fontSize: '16px',
+              cursor: 'pointer',
+            }}
+          >
+            Go Back
+          </button>
+          <img
+            src={nextBtn}
+            alt="Next"
+            onClick={() => setOnNextPage(true)}
+            onMouseEnter={(e) => (e.currentTarget.src = nextBtnHover)}
+            onMouseLeave={(e) => (e.currentTarget.src = nextBtn)}
+            style={{ cursor: 'pointer', height: '44px', width: 'auto' }}
+          />
+        </div>
       </div>
     )
   }
