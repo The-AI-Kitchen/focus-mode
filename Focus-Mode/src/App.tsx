@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import homePage from './assets/Home-Page (1).png'
+import confirmBtn from './assets/Focus Mode Visual Layouts (2).png'
+import confirmBtnHover from './assets/Focus Mode Visual Layouts.png'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -194,20 +196,14 @@ function App() {
           </button>
         </div>
 
-        <button
+        <img
+          src={confirmBtn}
+          alt="Confirm"
           onClick={() => setConfirmed(true)}
-          style={{
-            padding: '12px 32px',
-            borderRadius: '999px',
-            border: 'none',
-            backgroundColor: '#27ae60',
-            color: '#fff',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          Confirm
-        </button>
+          onMouseEnter={(e) => (e.currentTarget.src = confirmBtnHover)}
+          onMouseLeave={(e) => (e.currentTarget.src = confirmBtn)}
+          style={{ cursor: 'pointer', maxWidth: '200px' }}
+        />
 
         {showLinks && links.length > 0 && (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, width: '420px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
