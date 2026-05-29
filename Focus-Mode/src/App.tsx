@@ -5,10 +5,13 @@ import confirmBtnHover from './assets/btn-confirm-hover.png'
 import nextBtn from './assets/btn-next.png'
 import nextBtnHover from './assets/btn-next-hover.png'
 import Computer from './assets/Computer.png'
+import donutImg from './assets/donut-stop-trying.png'
 import timerImg from './assets/timer.png'
 import exitBtn from './assets/exit-button.png'
 import finishBtn from './assets/finish-work.png'
 import finishBtnHover from './assets/finish-work-hover.png'
+import youDidGreat from './assets/you-did-great-job.png'
+import confettiGif from './assets/confetti.gif'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -18,8 +21,28 @@ function App() {
   const [linkError, setLinkError] = useState('')
   const [links, setLinks] = useState<LinkEntry[]>(getLinks)
   const [showLinks, setShowLinks] = useState(false)
+  const [confirmError, setConfirmError] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
+  const [showDonut, setShowDonut] = useState(false)
+  const [donutFading, setDonutFading] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [celebrationFading, setCelebrationFading] = useState(false)
+
+  function digitsToSeconds(digits: string): number {
+    const padded = digits.padStart(6, '0')
+    return parseInt(padded.slice(0, 2)) * 3600
+      + parseInt(padded.slice(2, 4)) * 60
+      + parseInt(padded.slice(4, 6))
+  }
+
+  function secondsToFormatted(total: number): string {
+    const h = Math.floor(total / 3600)
+    const m = Math.floor((total % 3600) / 60)
+    const s = total % 60
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
 
   function formatTimerDigits(digits: string): string {
     const padded = digits.padStart(6, '0')
@@ -38,10 +61,38 @@ function App() {
     }
   }
 
-  function isValidUrl(value: string): boolean {
+  function normalizeUrl(value: string): string {
     try {
-      const url = new URL(value.includes('://') ? value : `https://${value}`)
-      return url.hostname.includes('.')
+      const withProtocol = value.includes('://') ? value : `https://${value}`
+      const hostname = new URL(withProtocol).hostname
+      return hostname.replace(/^www\./, '')
+    } catch {
+      return value.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+    }
+  }
+
+  function isValidUrl(value: string): boolean {
+    const trimmed = value.trim()
+    if (!trimmed) return false
+    try {
+      const url = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`)
+      const labels = url.hostname.split('.')
+
+      // Must have at least two parts (e.g. "google" + "com")
+      if (labels.length < 2) return false
+
+      // TLD must be 2+ letters only (e.g. "com", "org", "io")
+      const tld = labels[labels.length - 1]
+      if (!/^[a-zA-Z]{2,}$/.test(tld)) return false
+
+      // Every label must be non-empty, alphanumeric/hyphens, not start/end with hyphen
+      for (const label of labels) {
+        if (!label) return false
+        if (!/^[a-zA-Z0-9-]+$/.test(label)) return false
+        if (label.startsWith('-') || label.endsWith('-')) return false
+      }
+
+      return true
     } catch {
       return false
     }
@@ -52,6 +103,10 @@ function App() {
     if (!trimmed) return
     if (!isValidUrl(trimmed)) {
       setLinkError('Please enter a valid URL (e.g. youtube.com)')
+      return
+    }
+    if (links.some(l => normalizeUrl(l.url) === normalizeUrl(trimmed))) {
+      setLinkError('This link has already been added')
       return
     }
     setLinkError('')
@@ -73,44 +128,143 @@ function App() {
     document.body.style.backgroundColor = onNextPage ? '#0097b2' : ''
   }, [onNextPage])
 
+  useEffect(() => {
+    if (!linkError) return
+    const t = setTimeout(() => setLinkError(''), 3000)
+    return () => clearTimeout(t)
+  }, [linkError])
+
+  useEffect(() => {
+    if (!confirmError) return
+    const t = setTimeout(() => setConfirmError(''), 3000)
+    return () => clearTimeout(t)
+  }, [confirmError])
+
+  useEffect(() => {
+    if (!showCelebration) return
+    const t1 = setTimeout(() => setCelebrationFading(true), 10400)
+    const t2 = setTimeout(() => { setShowCelebration(false); setCelebrationFading(false) }, 11200)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [showCelebration])
+
+  useEffect(() => {
+    if (!onNextPage) return
+    const total = digitsToSeconds(timerDigits || '000000')
+    setRemainingSeconds(total)
+    setShowDonut(false)
+    let halfTriggered = false
+    const interval = setInterval(() => {
+      setRemainingSeconds(prev => {
+        if (!halfTriggered && prev <= total / 2) {
+          halfTriggered = true
+          setShowDonut(true)
+          setTimeout(() => setDonutFading(true), 3300)
+          setTimeout(() => { setShowDonut(false); setDonutFading(false) }, 4000)
+        }
+        if (prev <= 1) { clearInterval(interval); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [onNextPage])
+
   if (onNextPage) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '100%' }}>
           <img src={Computer} alt="Computer" style={{ display: 'block', width: '100%' }} />
-          <img
-            src={timerImg}
-            alt="Timer"
-            style={{
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '15%',
+            width: '10%',
+            transform: 'translateX(-50%)',
+          }}>
+            <img src={timerImg} alt="Timer" style={{ width: '100%', display: 'block' }} />
+            <span style={{
               position: 'absolute',
+              top: '58%',
               left: '50%',
-              top: '15%',
-              width: '10%',
-              transform: 'translateX(-50%)',
-            }}
-          />
+              transform: 'translate(-50%, -50%)',
+              fontSize: '1.2vw',
+              fontWeight: 'bold',
+              fontFamily: 'monospace',
+              color: '#000',
+              whiteSpace: 'nowrap',
+            }}>
+              {secondsToFormatted(remainingSeconds)}
+            </span>
+          </div>
+          {showCelebration && (
+            <div style={{
+              animation: celebrationFading ? 'fadeOut 0.8s ease-out forwards' : undefined,
+              pointerEvents: 'none',
+            }}>
+              <img
+                src={confettiGif}
+                alt=""
+                style={{
+                  position: 'absolute',
+                  left: '8%',
+                  top: '2.3%',
+                  width: '84%',
+                  height: '52.8%',
+                }}
+              />
+              <img
+                src={youDidGreat}
+                alt="You did a great job!"
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '47%',
+                  width: '12%',
+                  animation: 'badgePop 0.5s ease-out 0.2s both',
+                }}
+              />
+            </div>
+          )}
+          {showDonut && (
+            <img
+              src={donutImg}
+              alt="Donut Stop Trying"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '47%',
+                width: '12%',
+                animation: donutFading
+                  ? 'donutPopOut 0.7s ease-in forwards'
+                  : 'donutPopIn 0.4s ease-out forwards',
+              }}
+            />
+          )}
           <img
             src={exitBtn}
             alt="Exit"
+            onClick={() => { setOnNextPage(false); setConfirmed(false); setShowCelebration(false) }}
             style={{
               position: 'absolute',
               left: '43%',
               top: '15%',
               width: '2%',
               transform: 'translateX(-50%)',
+              cursor: 'pointer',
             }}
           />
           <img
             src={finishBtn}
             alt="Finish Work"
+            onClick={() => { if (remainingSeconds === 0) setShowCelebration(true) }}
             onMouseEnter={(e) => (e.currentTarget.src = finishBtnHover)}
             onMouseLeave={(e) => (e.currentTarget.src = finishBtn)}
             style={{
               position: 'absolute',
-              left: '62%',
-              top: '13%',
+              left: '55%',
+              top: '15%',
               width: '13%',
-              cursor: 'pointer',
+              cursor: remainingSeconds === 0 ? 'pointer' : 'not-allowed',
+              opacity: remainingSeconds === 0 ? 1 : 0.5,
             }}
           />
         </div>
@@ -154,7 +308,7 @@ function App() {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 }}>
-                  {entry.url}
+                  {normalizeUrl(entry.url)}
                 </li>
               ))}
             </ul>
@@ -190,8 +344,8 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-      <img src={homePage} alt="Home Page" style={{ maxWidth: '100%' }} />
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
+      <img src={homePage} alt="Home Page" style={{ maxWidth: '100%', maxHeight: '50vh', width: 'auto', height: 'auto' }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
         <input
@@ -199,7 +353,7 @@ function App() {
           placeholder="00:00:00"
           value={timerDigits ? formatTimerDigits(timerDigits) : ''}
           onKeyDown={handleTimerKeyDown}
-          readOnly
+          onChange={() => {}}
           style={{
             width: '420px',
             padding: '18px 28px',
@@ -265,11 +419,29 @@ function App() {
         <img
           src={confirmBtn}
           alt="Confirm"
-          onClick={() => setConfirmed(true)}
+          onClick={() => {
+            const hasTime = timerDigits.length > 0 && timerDigits.replace(/0/g, '') !== ''
+            const hasLink = links.length > 0
+            if (!hasTime && !hasLink) {
+              setConfirmError('Please enter a time and at least one link before continuing')
+            } else if (!hasTime) {
+              setConfirmError('Please enter a time before continuing')
+            } else if (!hasLink) {
+              setConfirmError('Please add at least one link before continuing')
+            } else {
+              setConfirmError('')
+              setConfirmed(true)
+            }
+          }}
           onMouseEnter={(e) => (e.currentTarget.src = confirmBtnHover)}
           onMouseLeave={(e) => (e.currentTarget.src = confirmBtn)}
           style={{ cursor: 'pointer', maxWidth: '200px' }}
         />
+        {confirmError && (
+          <span style={{ color: '#c0392b', fontSize: '14px' }}>
+            {confirmError}
+          </span>
+        )}
 
         {showLinks && links.length > 0 && (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, width: '420px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -290,7 +462,7 @@ function App() {
                   gap: '12px',
                 }}
               >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.url}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{normalizeUrl(entry.url)}</span>
                 <button
                   onClick={() => handleRemoveLink(entry.id)}
                   style={{
