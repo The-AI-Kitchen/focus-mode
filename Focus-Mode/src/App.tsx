@@ -5,6 +5,10 @@ import confirmBtnHover from './assets/btn-confirm-hover.png'
 import nextBtn from './assets/btn-next.png'
 import nextBtnHover from './assets/btn-next-hover.png'
 import Computer from './assets/Computer.png'
+import timerImg from './assets/timer.png'
+import exitBtn from './assets/exit-button.png'
+import finishBtn from './assets/finish-work.png'
+import finishBtnHover from './assets/finish-work-hover.png'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -72,11 +76,44 @@ function App() {
   if (onNextPage) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden' }}>
-        <img
-          src={Computer}
-          alt="Computer"
-          style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', maxWidth: '100%' }}
-        />
+        <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '100%' }}>
+          <img src={Computer} alt="Computer" style={{ display: 'block', width: '100%' }} />
+          <img
+            src={timerImg}
+            alt="Timer"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '15%',
+              width: '10%',
+              transform: 'translateX(-50%)',
+            }}
+          />
+          <img
+            src={exitBtn}
+            alt="Exit"
+            style={{
+              position: 'absolute',
+              left: '43%',
+              top: '15%',
+              width: '2%',
+              transform: 'translateX(-50%)',
+            }}
+          />
+          <img
+            src={finishBtn}
+            alt="Finish Work"
+            onMouseEnter={(e) => (e.currentTarget.src = finishBtnHover)}
+            onMouseLeave={(e) => (e.currentTarget.src = finishBtn)}
+            style={{
+              position: 'absolute',
+              left: '62%',
+              top: '13%',
+              width: '13%',
+              cursor: 'pointer',
+            }}
+          />
+        </div>
       </div>
     )
   }
