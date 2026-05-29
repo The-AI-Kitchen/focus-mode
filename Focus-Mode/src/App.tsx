@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import homePage from './assets/home-page.png'
 import confirmBtn from './assets/btn-confirm.png'
 import confirmBtnHover from './assets/btn-confirm-hover.png'
@@ -10,8 +10,13 @@ import timerImg from './assets/timer.png'
 import exitBtn from './assets/exit-button.png'
 import finishBtn from './assets/finish-work.png'
 import finishBtnHover from './assets/finish-work-hover.png'
+import takeABreak from './assets/take-a-break.png'
+import takeABreakHover from './assets/take-a-break-hover.png'
 import youDidGreat from './assets/you-did-great-job.png'
 import confettiGif from './assets/confetti.gif'
+import alarmSound from './assets/ios_17_radial.mp3'
+import countdownSound from './assets/timer-countdown.mp3'
+import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
 import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
 
@@ -26,6 +31,26 @@ function App() {
   const [onNextPage, setOnNextPage] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
   const [showDonut, setShowDonut] = useState(false)
+  const countdownAudioRef = useRef<HTMLAudioElement | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const audioEnabledRef = useRef(false)
+
+  function stopSession() {
+    // Stop countdown sound immediately
+    if (countdownAudioRef.current) {
+      countdownAudioRef.current.pause()
+      countdownAudioRef.current.currentTime = 0
+      countdownAudioRef.current = null
+    }
+    // Kill the interval so alarm can't fire
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+    // Disable audio for this session
+    audioEnabledRef.current = false
+  }
+  const [finishUsed, setFinishUsed] = useState(false)
   const [donutFading, setDonutFading] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationFading, setCelebrationFading] = useState(false)
@@ -152,7 +177,16 @@ function App() {
     const total = digitsToSeconds(timerDigits || '000000')
     setRemainingSeconds(total)
     setShowDonut(false)
+    audioEnabledRef.current = true
+
+    // Pre-create audio so ref is always valid for stopSession()
+    const cdAudio = new Audio(countdownSound)
+    cdAudio.currentTime = 0
+    countdownAudioRef.current = cdAudio
+
     let halfTriggered = false
+    let countdownStarted = false
+
     const interval = setInterval(() => {
       setRemainingSeconds(prev => {
         if (!halfTriggered && prev <= total / 2) {
@@ -161,11 +195,26 @@ function App() {
           setTimeout(() => setDonutFading(true), 3300)
           setTimeout(() => { setShowDonut(false); setDonutFading(false) }, 4000)
         }
-        if (prev <= 1) { clearInterval(interval); return 0 }
+        if (prev === 10 && !countdownStarted && audioEnabledRef.current) {
+          countdownStarted = true
+          cdAudio.currentTime = 0
+          cdAudio.play()
+        }
+        if (prev <= 1) {
+          clearInterval(interval)
+          intervalRef.current = null
+          if (audioEnabledRef.current) {
+            cdAudio.pause()
+            cdAudio.currentTime = 0
+            new Audio(alarmSound).play()
+          }
+          return 0
+        }
         return prev - 1
       })
     }, 1000)
-    return () => clearInterval(interval)
+    intervalRef.current = interval
+    return () => { clearInterval(interval); intervalRef.current = null }
   }, [onNextPage])
 
   if (onNextPage) {
@@ -224,7 +273,7 @@ function App() {
               />
             </div>
           )}
-          {showDonut && (
+          {showDonut && !finishUsed && (
             <img
               src={donutImg}
               alt="Donut Stop Trying"
@@ -242,7 +291,7 @@ function App() {
           <img
             src={exitBtn}
             alt="Exit"
-            onClick={() => { setOnNextPage(false); setConfirmed(false); setShowCelebration(false) }}
+            onClick={() => { stopSession(); setOnNextPage(false); setConfirmed(false); setShowCelebration(false); setFinishUsed(false) }}
             style={{
               position: 'absolute',
               left: '43%',
@@ -255,16 +304,29 @@ function App() {
           <img
             src={finishBtn}
             alt="Finish Work"
-            onClick={() => { if (remainingSeconds === 0) setShowCelebration(true) }}
-            onMouseEnter={(e) => (e.currentTarget.src = finishBtnHover)}
-            onMouseLeave={(e) => (e.currentTarget.src = finishBtn)}
+            onClick={() => { if (!finishUsed) { stopSession(); setFinishUsed(true); setShowCelebration(true); new Audio(partyHorn).play() } }}
+            onMouseEnter={(e) => { if (!finishUsed) e.currentTarget.src = finishBtnHover }}
+            onMouseLeave={(e) => { if (!finishUsed) e.currentTarget.src = finishBtn }}
             style={{
               position: 'absolute',
               left: '55%',
               top: '15%',
               width: '13%',
-              cursor: remainingSeconds === 0 ? 'pointer' : 'not-allowed',
-              opacity: remainingSeconds === 0 ? 1 : 0.5,
+              cursor: finishUsed ? 'not-allowed' : 'pointer',
+              opacity: finishUsed ? 0.5 : 1,
+            }}
+          />
+          <img
+            src={takeABreak}
+            alt="Take a Break"
+            onMouseEnter={(e) => (e.currentTarget.src = takeABreakHover)}
+            onMouseLeave={(e) => (e.currentTarget.src = takeABreak)}
+            style={{
+              position: 'absolute',
+              left: '55.6%',
+              top: '22%',
+              width: '11.5%',
+              cursor: 'pointer',
             }}
           />
         </div>
