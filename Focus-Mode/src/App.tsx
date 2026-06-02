@@ -27,11 +27,15 @@ function App() {
   const [timerDigits, setTimerDigits] = useState(loadTimer)
   const [linkInput, setLinkInput] = useState('')
   const [linkError, setLinkError] = useState('')
-  const [links, setLinks] = useState<LinkEntry[]>(getLinks)
+  const [links, setLinks] = useState<LinkEntry[]>([])
   const [showLinks, setShowLinks] = useState(false)
   const [confirmError, setConfirmError] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
+
+  useEffect(() => {
+    getLinks().then((loaded) => setLinks(loaded)).catch(() => setLinks([]))
+  }, [])
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
   const [showDonut, setShowDonut] = useState(false)
   const [motivationalImg, setMotivationalImg] = useState(donutImg)
@@ -130,7 +134,7 @@ function App() {
     }
   }
 
-  function handleAddLink() {
+  async function handleAddLink() {
     const trimmed = linkInput.trim()
     if (!trimmed) return
     if (!isValidUrl(trimmed)) {
@@ -142,14 +146,14 @@ function App() {
       return
     }
     setLinkError('')
-    addLink(trimmed)
-    setLinks(getLinks())
+    await addLink(trimmed, normalizeUrl(trimmed))
+    setLinks(await getLinks())
     setLinkInput('')
   }
 
-  function handleRemoveLink(id: string) {
-    removeLink(id)
-    setLinks(getLinks())
+  async function handleRemoveLink(id: string) {
+    await removeLink(id)
+    setLinks(await getLinks())
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -399,7 +403,7 @@ function App() {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 }}>
-                  {normalizeUrl(entry.url)}
+                  {entry.siteName}
                 </li>
               ))}
             </ul>
@@ -553,7 +557,7 @@ function App() {
                   gap: '12px',
                 }}
               >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{normalizeUrl(entry.url)}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.siteName}</span>
                 <button
                   onClick={() => handleRemoveLink(entry.id)}
                   style={{
