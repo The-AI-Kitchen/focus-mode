@@ -4,10 +4,36 @@ const TIMER_KEY = 'focus_mode_timer'
 export interface LinkEntry {
   id: string
   url: string
-  addedAt: number
+  siteName: string
+  accessedAt: number
 }
 
-function loadLinks(): LinkEntry[] {
+function isChromeStorageAvailable(): boolean {
+  return typeof window !== 'undefined' && Boolean((window as any).chrome?.storage?.local)
+}
+
+function chromeStorageGet<T>(key: string): Promise<T | undefined> {
+  return new Promise((resolve) => {
+    if (!isChromeStorageAvailable()) return resolve(undefined)
+    ;(window as any).chrome.storage.local.get(key, (result: any) => {
+      resolve(result?.[key])
+    })
+  })
+}
+
+function chromeStorageSet<T>(key: string, value: T): Promise<void> {
+  return new Promise((resolve) => {
+    if (!isChromeStorageAvailable()) return resolve()
+    ;(window as any).chrome.storage.local.set({ [key]: value }, () => {
+      resolve()
+    })
+  })
+}
+
+async function loadLinks(): Promise<LinkEntry[]> {
+  const chromeStored = await chromeStorageGet<LinkEntry[]>(LINKS_KEY)
+  if (chromeStored !== undefined) return chromeStored
+
   try {
     const raw = localStorage.getItem(LINKS_KEY)
     return raw ? (JSON.parse(raw) as LinkEntry[]) : []
@@ -16,29 +42,31 @@ function loadLinks(): LinkEntry[] {
   }
 }
 
-function saveLinks(links: LinkEntry[]): void {
+async function saveLinks(links: LinkEntry[]): Promise<void> {
+  await chromeStorageSet(LINKS_KEY, links)
   localStorage.setItem(LINKS_KEY, JSON.stringify(links))
 }
 
-export function addLink(url: string): LinkEntry {
+export async function addLink(url: string, siteName: string): Promise<LinkEntry> {
   const entry: LinkEntry = {
     id: crypto.randomUUID(),
     url: url.trim(),
-    addedAt: Date.now(),
+    siteName: siteName.trim(),
+    accessedAt: Date.now(),
   }
-  const links = loadLinks()
+  const links = await loadLinks()
   links.push(entry)
-  saveLinks(links)
+  await saveLinks(links)
   return entry
 }
 
-export function getLinks(): LinkEntry[] {
+export async function getLinks(): Promise<LinkEntry[]> {
   return loadLinks()
 }
 
-export function removeLink(id: string): void {
-  const links = loadLinks().filter((l) => l.id !== id)
-  saveLinks(links)
+export async function removeLink(id: string): Promise<void> {
+  const links = (await loadLinks()).filter((l) => l.id !== id)
+  await saveLinks(links)
 }
 
 export function saveTimer(digits: string): void {
