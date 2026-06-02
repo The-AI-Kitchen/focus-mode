@@ -264,9 +264,9 @@ function App() {
 
   if (onNextPage) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '100%' }}>
-          <img src={Computer} alt="Computer" style={{ display: 'block', width: '100%' }} />
+      <div style={{ height: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', width: '100%', maxHeight: '100vh', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <img src={Computer} alt="Computer" style={{ display: 'block', width: '100%', maxHeight: '100vh', objectFit: 'contain', objectPosition: 'bottom' }} />
           <div style={{
             position: 'absolute',
             left: '50%',
