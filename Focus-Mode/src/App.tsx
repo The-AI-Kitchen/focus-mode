@@ -6,6 +6,9 @@ import nextBtn from './assets/btn-next.png'
 import nextBtnHover from './assets/btn-next-hover.png'
 import Computer from './assets/Computer.png'
 import donutImg from './assets/donut-stop-trying.png'
+import butterflyImg from './assets/butterfly.png'
+import keepGrowingImg from './assets/keep-growing.png'
+import youCanDoItImg from './assets/you-can-do-it.png'
 import timerImg from './assets/timer.png'
 import exitBtn from './assets/exit-button.png'
 import finishBtn from './assets/finish-work.png'
@@ -31,23 +34,27 @@ function App() {
   const [onNextPage, setOnNextPage] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
   const [showDonut, setShowDonut] = useState(false)
+  const [motivationalImg, setMotivationalImg] = useState(donutImg)
   const countdownAudioRef = useRef<HTMLAudioElement | null>(null)
+  const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const audioEnabledRef = useRef(false)
 
   function stopSession() {
-    // Stop countdown sound immediately
     if (countdownAudioRef.current) {
       countdownAudioRef.current.pause()
       countdownAudioRef.current.currentTime = 0
       countdownAudioRef.current = null
     }
-    // Kill the interval so alarm can't fire
+    if (alarmAudioRef.current) {
+      alarmAudioRef.current.pause()
+      alarmAudioRef.current.currentTime = 0
+      alarmAudioRef.current = null
+    }
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
-    // Disable audio for this session
     audioEnabledRef.current = false
   }
   const [finishUsed, setFinishUsed] = useState(false)
@@ -184,34 +191,56 @@ function App() {
     cdAudio.currentTime = 0
     countdownAudioRef.current = cdAudio
 
-    let halfTriggered = false
+    const motivationalImages = [donutImg, butterflyImg, keepGrowingImg, youCanDoItImg]
+    let lastMotivationalImg: string | null = null
+    const pickMotivational = () => {
+      const choices = motivationalImages.filter(img => img !== lastMotivationalImg)
+      const picked = choices[Math.floor(Math.random() * choices.length)]
+      lastMotivationalImg = picked
+      return picked
+    }
+    const showMotivational = () => {
+      setMotivationalImg(pickMotivational())
+      setShowDonut(true)
+      setTimeout(() => setDonutFading(true), 3300)
+      setTimeout(() => { setShowDonut(false); setDonutFading(false) }, 4000)
+    }
+
+    let oneThirdTriggered = false
+    let twoThirdsTriggered = false
     let countdownStarted = false
 
+    let remaining = total
+
     const interval = setInterval(() => {
-      setRemainingSeconds(prev => {
-        if (!halfTriggered && prev <= total / 2) {
-          halfTriggered = true
-          setShowDonut(true)
-          setTimeout(() => setDonutFading(true), 3300)
-          setTimeout(() => { setShowDonut(false); setDonutFading(false) }, 4000)
-        }
-        if (prev === 10 && !countdownStarted && audioEnabledRef.current) {
-          countdownStarted = true
+      if (!twoThirdsTriggered && remaining <= total * (2 / 3)) {
+        twoThirdsTriggered = true
+        showMotivational()
+      }
+      if (!oneThirdTriggered && remaining <= total * (1 / 3)) {
+        oneThirdTriggered = true
+        showMotivational()
+      }
+      if (remaining === 10 && !countdownStarted && audioEnabledRef.current) {
+        countdownStarted = true
+        cdAudio.currentTime = 0
+        cdAudio.play()
+      }
+      if (remaining <= 1) {
+        clearInterval(interval)
+        intervalRef.current = null
+        setRemainingSeconds(0)
+        if (audioEnabledRef.current) {
+          cdAudio.pause()
           cdAudio.currentTime = 0
-          cdAudio.play()
+          const alarm = new Audio(alarmSound)
+          alarmAudioRef.current = alarm
+          alarm.play()
         }
-        if (prev <= 1) {
-          clearInterval(interval)
-          intervalRef.current = null
-          if (audioEnabledRef.current) {
-            cdAudio.pause()
-            cdAudio.currentTime = 0
-            new Audio(alarmSound).play()
-          }
-          return 0
-        }
-        return prev - 1
-      })
+        return
+      }
+      remaining -= 1
+      setRemainingSeconds(remaining)
     }, 1000)
     intervalRef.current = interval
     return () => { clearInterval(interval); intervalRef.current = null }
@@ -275,8 +304,8 @@ function App() {
           )}
           {showDonut && !finishUsed && (
             <img
-              src={donutImg}
-              alt="Donut Stop Trying"
+              src={motivationalImg}
+              alt="Motivational Character"
               style={{
                 position: 'absolute',
                 left: '50%',
