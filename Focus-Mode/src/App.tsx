@@ -6,6 +6,11 @@ import nextBtn from './assets/btn-next.png'
 import nextBtnHover from './assets/btn-next-hover.png'
 import Computer from './assets/Computer.png'
 import donutImg from './assets/donut-stop-trying.png'
+import breakWindow from './assets/break-window.png'
+import breakYes from './assets/break-yes.png'
+import breakYesHover from './assets/break-yes-hover.png'
+import breakNo from './assets/break-no.png'
+import breakNoHover from './assets/break-no-hover.png'
 import butterflyImg from './assets/butterfly.png'
 import keepGrowingImg from './assets/keep-growing.png'
 import youCanDoItImg from './assets/you-can-do-it.png'
@@ -65,6 +70,10 @@ function App() {
   const [donutFading, setDonutFading] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationFading, setCelebrationFading] = useState(false)
+  const [showBreak, setShowBreak] = useState(false)
+  const remainingRef = useRef(0)
+  const isPausedRef = useRef(false)
+  const countdownWasPlayingRef = useRef(false)
 
   function digitsToSeconds(digits: string): number {
     const padded = digits.padStart(6, '0')
@@ -215,17 +224,21 @@ function App() {
     let countdownStarted = false
 
     let remaining = total
+    remainingRef.current = remaining
+    isPausedRef.current = false
 
     const interval = setInterval(() => {
+      if (isPausedRef.current) return
       if (!twoThirdsTriggered && remaining <= total * (2 / 3)) {
         twoThirdsTriggered = true
         showMotivational()
       }
+
       if (!oneThirdTriggered && remaining <= total * (1 / 3)) {
         oneThirdTriggered = true
         showMotivational()
       }
-      if (remaining === 10 && !countdownStarted && audioEnabledRef.current) {
+      if (remaining === 11 && !countdownStarted && audioEnabledRef.current) {
         countdownStarted = true
         cdAudio.currentTime = 0
         cdAudio.play()
@@ -235,8 +248,6 @@ function App() {
         intervalRef.current = null
         setRemainingSeconds(0)
         if (audioEnabledRef.current) {
-          cdAudio.pause()
-          cdAudio.currentTime = 0
           const alarm = new Audio(alarmSound)
           alarmAudioRef.current = alarm
           alarm.play()
@@ -244,6 +255,7 @@ function App() {
         return
       }
       remaining -= 1
+      remainingRef.current = remaining
       setRemainingSeconds(remaining)
     }, 1000)
     intervalRef.current = interval
@@ -352,17 +364,98 @@ function App() {
           <img
             src={takeABreak}
             alt="Take a Break"
-            onMouseEnter={(e) => (e.currentTarget.src = takeABreakHover)}
+            onMouseEnter={(e) => { if (remainingSeconds > 0 && !finishUsed) e.currentTarget.src = takeABreakHover }}
             onMouseLeave={(e) => (e.currentTarget.src = takeABreak)}
+            onClick={() => {
+              if (!finishUsed && remainingSeconds > 0) {
+                isPausedRef.current = true
+                if (countdownAudioRef.current && !countdownAudioRef.current.paused) {
+                  countdownAudioRef.current.pause()
+                  countdownWasPlayingRef.current = true
+                } else {
+                  countdownWasPlayingRef.current = false
+                }
+                setShowBreak(true)
+              }
+            }}
             style={{
               position: 'absolute',
               left: '55.6%',
               top: '22%',
               width: '11.5%',
-              cursor: 'pointer',
+              cursor: remainingSeconds > 0 && !finishUsed ? 'pointer' : 'not-allowed',
+              opacity: remainingSeconds > 0 && !finishUsed ? 1 : 0.5,
             }}
           />
         </div>
+        {showBreak && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#0097b2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+          }}>
+            <div style={{ position: 'relative', width: '55%' }}>
+              <img src={breakWindow} alt="Break window" style={{ width: '100%', display: 'block' }} />
+              {/* Clickable hit area over the X in the top-right corner of the window image */}
+              <div
+                onClick={() => {
+                  setShowBreak(false)
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
+                    countdownAudioRef.current.play()
+                    countdownWasPlayingRef.current = false
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  left: '87%',
+                  top: '1%',
+                  width: '12%',
+                  height: '11%',
+                  cursor: 'pointer',
+                }}
+              />
+              <img
+                src={breakYes}
+                alt="Yes"
+                onMouseEnter={(e) => (e.currentTarget.src = breakYesHover)}
+                onMouseLeave={(e) => (e.currentTarget.src = breakYes)}
+                style={{
+                  position: 'absolute',
+                  left: '10%',
+                  bottom: '9%',
+                  width: '36%',
+                  cursor: 'pointer',
+                }}
+              />
+              <img
+                src={breakNo}
+                alt="No"
+                onMouseEnter={(e) => (e.currentTarget.src = breakNoHover)}
+                onMouseLeave={(e) => (e.currentTarget.src = breakNo)}
+                onClick={() => {
+                  setShowBreak(false)
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
+                    countdownAudioRef.current.play()
+                    countdownWasPlayingRef.current = false
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  right: '10%',
+                  bottom: '9%',
+                  width: '36%',
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     )
   }
