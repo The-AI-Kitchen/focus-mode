@@ -18,7 +18,9 @@ import alarmSound from './assets/ios_17_radial.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
 import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
-import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
+import { loadLinks, saveLinks, addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
+import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from 'recharts'
+import { sortLinksByDomain, condenseLinksByDay, getLinksByDay, deleteLinksByDay, performDailyArchive, getDayOfWeek} from './db_mng'
 
 function App() {
   const [timerDigits, setTimerDigits] = useState(loadTimer)
@@ -175,6 +177,32 @@ function App() {
     const t2 = setTimeout(() => { setShowCelebration(false); setCelebrationFading(false) }, 11200)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [showCelebration])
+
+  const [condensedData, setCondensedData] = useState<{ siteName: string; timeSpent: number }[]>([])
+
+
+  useEffect(() => {
+    const today = new Date().toDateString()
+    condenseLinksByDay(today).then((condensed) => setCondensedData(condensed)).catch(() => setCondensedData([]))
+  })
+
+  /*Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={condensedData}
+          dataKey="timeSpent"
+          nameKey="siteName"
+          cx="50%"
+          cy="50%"
+          outerRadius={100}>
+            {condensedData.map((_, index) => (
+              <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#87ceeb'][index % 5]} />
+            ))}
+
+        </Pie>
+      </PieChart>
+    </ResponsiveContainer>*/
 
   useEffect(() => {
     if (!onNextPage) return
