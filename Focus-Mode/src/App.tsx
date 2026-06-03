@@ -593,6 +593,8 @@ function App() {
                     if (remaining <= 0) {
                       clearInterval(iv)
                       breakIntervalRef.current = null
+                      const alarm = new Audio(alarmSound)
+                      alarm.play()
                     }
                   }, 1000)
                   breakIntervalRef.current = iv
