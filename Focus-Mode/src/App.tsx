@@ -30,7 +30,7 @@ import hoursTotalBtn from './assets/hours-total-button.png'
 import yellowHighlight from './assets/yellow-highlight.png'
 import arrowDropdown from './assets/arrow-dropdown.png'
 import confettiGif from './assets/confetti.gif'
-import alarmSound from './assets/ios_17_radial.mp3'
+import alarmSound from './assets/alarm-sound.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
 import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
@@ -252,6 +252,13 @@ function App() {
       if (remaining === 11 && !countdownStarted && audioEnabledRef.current) {
         countdownStarted = true
         cdAudio.currentTime = 0
+        cdAudio.play()
+      }
+      // For timers shorter than 10s, start the countdown audio immediately at the
+      // matching offset so the ticks line up with the remaining seconds
+      if (!countdownStarted && remaining < 11 && remaining >= 1 && audioEnabledRef.current) {
+        countdownStarted = true
+        cdAudio.currentTime = Math.max(0, 10 - remaining)
         cdAudio.play()
       }
       if (remaining <= 1) {
