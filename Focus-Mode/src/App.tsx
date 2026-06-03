@@ -23,6 +23,12 @@ import takeABreakHover from './assets/take-a-break-hover.png'
 import youDidGreat from './assets/you-did-great-job.png'
 import productivityTrackerBtn from './assets/productivity-tracker-button.png'
 import productivityTrackerBtnHover from './assets/productvity-tracker-button-hover.png'
+import statsWeekTableBg from './assets/stats-week-table-bg.png'
+import tableLine from './assets/table-line.png'
+import miniClock from './assets/mini-clock.png'
+import hoursTotalBtn from './assets/hours-total-button.png'
+import yellowHighlight from './assets/yellow-highlight.png'
+import arrowDropdown from './assets/arrow-dropdown.png'
 import confettiGif from './assets/confetti.gif'
 import alarmSound from './assets/ios_17_radial.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
@@ -39,6 +45,9 @@ function App() {
   const [confirmError, setConfirmError] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
+  const [showProductivity, setShowProductivity] = useState(false)
+  const [arrowFlipped, setArrowFlipped] = useState<boolean[]>(Array(7).fill(false))
+  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay())
 
   useEffect(() => {
     getLinks().then((loaded) => setLinks(loaded)).catch(() => setLinks([]))
@@ -533,6 +542,149 @@ function App() {
     )
   }
 
+  if (showProductivity) {
+    const today = new Date()
+    const todayIndex = today.getDay()
+    const sunday = new Date(today)
+    sunday.setDate(today.getDate() - todayIndex)
+    const dayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat']
+    const fullMonthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const saturday = new Date(sunday)
+    saturday.setDate(sunday.getDate() + 6)
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(sunday)
+      d.setDate(sunday.getDate() + i)
+      return { name: dayNames[i], date: `${fullMonthNames[d.getMonth()]} ${d.getDate()}` }
+    })
+    const rangeStart = `Sun, ${fullMonthNames[sunday.getMonth()]} ${sunday.getDate()}`
+    const rangeEnd = `Sat, ${fullMonthNames[saturday.getMonth()]} ${saturday.getDate()}`
+    const year = sunday.getFullYear()
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#0097b2' }}>
+        <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '6px', boxSizing: 'border-box' }}>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+            {rangeStart} – {rangeEnd}
+          </span>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+            {year}
+          </span>
+        </div>
+        <div style={{ position: 'relative', display: 'inline-block', width: 'calc(100% - 80px)', margin: '0 40px' }}>
+          <img src={statsWeekTableBg} alt="Weekly Stats" style={{ width: '100%', height: 'auto', display: 'block' }} />
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <img
+              key={i}
+              src={tableLine}
+              alt=""
+              style={{
+                position: 'absolute',
+                top: '0',
+                left: `${(i / 7) * 100}%`,
+                height: '100%',
+                width: 'auto',
+              }}
+            />
+          ))}
+          {weekDays.map((day, i) => {
+            const isSelected = i === selectedDay
+            return (
+              <div
+                key={i}
+                onClick={() => setSelectedDay(i)}
+                style={{
+                  position: 'absolute',
+                  top: isSelected ? '0%' : '3%',
+                  left: `${(i / 7) * 100 + (1 / 7) * 50}%`,
+                  transform: 'translateX(-50%)',
+                  width: `${(1 / 7) * 85}%`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2% 0',
+                  cursor: 'pointer',
+                  transition: 'top 0.3s ease',
+                }}
+              >
+                <img
+                  src={yellowHighlight}
+                  alt=""
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '90%',
+                    height: '70%',
+                    objectFit: 'fill',
+                    zIndex: 0,
+                    opacity: isSelected ? 1 : 0,
+                    transition: 'opacity 0.3s ease',
+                  }}
+                />
+                <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '800', fontSize: '2vw', color: '#222', lineHeight: 1.2, position: 'relative', zIndex: 1 }}>{day.name}</span>
+                <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '400', fontSize: '1.4vw', color: '#222', lineHeight: 1.2, position: 'relative', zIndex: 1 }}>{day.date}</span>
+              </div>
+            )
+          })}
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+            <img
+              key={i}
+              src={miniClock}
+              alt="clock"
+              style={{
+                position: 'absolute',
+                top: '39%',
+                left: `${(i / 7) * 100 + (1 / 7) * 50}%`,
+                transform: 'translateX(-50%)',
+                height: '15%',
+                width: 'auto',
+              }}
+            />
+          ))}
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              onClick={() => setArrowFlipped((prev) => prev.map((v, j) => j === i ? !v : v))}
+              style={{
+                position: 'absolute',
+                top: '62%',
+                left: `${(i / 7) * 100 + (1 / 7) * 50}%`,
+                transform: 'translateX(-50%)',
+                height: '25%',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              <img src={hoursTotalBtn} alt="hours total" style={{ height: '100%', width: 'auto' }} />
+              <img
+                src={arrowDropdown}
+                alt="arrow"
+                style={{
+                  position: 'absolute',
+                  right: '6%',
+                  bottom: '32.5%',
+                  height: '20%',
+                  width: 'auto',
+                  transform: arrowFlipped[i] ? 'scaleY(-1)' : 'scaleY(1)',
+                  transition: 'transform 0.2s ease',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowProductivity(false)}
+          style={{ marginTop: '24px', padding: '10px 28px', borderRadius: '999px', border: 'none', backgroundColor: '#4a4a4a', color: '#fff', fontSize: '16px', cursor: 'pointer' }}
+        >
+          Back
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
       <img src={homePage} alt="Home Page" style={{ maxWidth: '100%', maxHeight: '50vh', width: 'auto', height: 'auto' }} />
@@ -541,7 +693,8 @@ function App() {
         alt="Productivity Tracker"
         onMouseEnter={(e) => (e.currentTarget.src = productivityTrackerBtnHover)}
         onMouseLeave={(e) => (e.currentTarget.src = productivityTrackerBtn)}
-        style={{ position: 'fixed', top: '16px', right: '16px', height: '44px', width: 'auto' }}
+        onClick={() => setShowProductivity(true)}
+        style={{ position: 'fixed', top: '16px', right: '16px', height: '44px', width: 'auto', cursor: 'pointer' }}
       />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
         <input
