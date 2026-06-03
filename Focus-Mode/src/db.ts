@@ -32,7 +32,7 @@ function chromeStorageSet<T>(key: string, value: T): Promise<void> {
   })
 }
 
-async function loadLinks(): Promise<LinkEntry[]> {
+export async function loadLinks(): Promise<LinkEntry[]> {
   const chromeStored = await chromeStorageGet<LinkEntry[]>(LINKS_KEY)
   if (chromeStored !== undefined) return chromeStored
 
@@ -44,7 +44,7 @@ async function loadLinks(): Promise<LinkEntry[]> {
   }
 }
 
-async function saveLinks(links: LinkEntry[]): Promise<void> {
+export async function saveLinks(links: LinkEntry[]): Promise<void> {
   await chromeStorageSet(LINKS_KEY, links)
   localStorage.setItem(LINKS_KEY, JSON.stringify(links))
 }

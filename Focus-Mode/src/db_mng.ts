@@ -1,4 +1,4 @@
-import { getLinks, removeLink, type LinkEntry } from './db'
+import { getLinks, removeLink, loadLinks, saveLinks, type LinkEntry } from './db'
 
 // Sorts an array of links by website name in alphabetical order
 export function sortLinksByDomain(links: LinkEntry[]): LinkEntry[] {
@@ -59,10 +59,15 @@ export async function condenseLinksByDay(date: Date | string): Promise<{ siteNam
 }
 
 export async function deleteLinksByDay(date: Date | string): Promise<void> {
-  const links = await getLinksByDay(date)
-  for (const link of links) {
-    await removeLink(link.id)
-  }
+  const linksToDelete = await getLinksByDay(date)
+  const allLinks = await loadLinks()
+  
+  // Batch delete: create a set of IDs to delete for O(1) lookup
+  const idsToDelete = new Set(linksToDelete.map(l => l.id))
+  const filteredLinks = allLinks.filter(l => !idsToDelete.has(l.id))
+  
+  // Save once with all deletions applied
+  await saveLinks(filteredLinks)
 }
 
 // Performs daily archive: creates condensed summary and removes full history from chrome storage
