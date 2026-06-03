@@ -11,6 +11,13 @@ import breakYes from './assets/break-yes.png'
 import breakYesHover from './assets/break-yes-hover.png'
 import breakNo from './assets/break-no.png'
 import breakNoHover from './assets/break-no-hover.png'
+import breakSetTime from './assets/break-set-time.png'
+import breakCountdown from './assets/break-countdown.png'
+import relaxImg from './assets/relax.png'
+import timeIsUpImg from './assets/time-is-up.png'
+import breakSetter from './assets/break-setter.png'
+import breakConfirm from './assets/break-confirm.png'
+import breakConfirmHover from './assets/break-confirm-hover.png'
 import butterflyImg from './assets/butterfly.png'
 import keepGrowingImg from './assets/keep-growing.png'
 import youCanDoItImg from './assets/you-can-do-it.png'
@@ -82,6 +89,13 @@ function App() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationFading, setCelebrationFading] = useState(false)
   const [showBreak, setShowBreak] = useState(false)
+  const [showBreakSetter, setShowBreakSetter] = useState(false)
+  const [breakSetterVisible, setBreakSetterVisible] = useState(false)
+  const [breakTimerDigits, setBreakTimerDigits] = useState('')
+  const [showBreakCountdown, setShowBreakCountdown] = useState(false)
+  const [breakCountdownVisible, setBreakCountdownVisible] = useState(false)
+  const [breakRemainingSeconds, setBreakRemainingSeconds] = useState(0)
+  const breakIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const remainingRef = useRef(0)
   const isPausedRef = useRef(false)
   const countdownWasPlayingRef = useRef(false)
@@ -282,7 +296,7 @@ function App() {
 
   if (onNextPage) {
     return (
-      <div style={{ height: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <div key="timer-page" className="page-fade-in" style={{ height: '100vh', backgroundColor: '#0097b2', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
         <div style={{ position: 'relative', width: '100%', maxHeight: '100vh', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <img src={Computer} alt="Computer" style={{ display: 'block', width: '100%', maxHeight: '100vh', objectFit: 'contain', objectPosition: 'bottom' }} />
           <div style={{
@@ -407,7 +421,7 @@ function App() {
           />
         </div>
         {showBreak && (
-          <div style={{
+          <div className="page-fade-in" style={{
             position: 'fixed',
             inset: 0,
             backgroundColor: '#0097b2',
@@ -442,6 +456,12 @@ function App() {
                 alt="Yes"
                 onMouseEnter={(e) => (e.currentTarget.src = breakYesHover)}
                 onMouseLeave={(e) => (e.currentTarget.src = breakYes)}
+                onClick={() => {
+                  setBreakTimerDigits('')
+                  setShowBreak(false)
+                  setShowBreakSetter(true)
+                  setTimeout(() => setBreakSetterVisible(true), 20)
+                }}
                 style={{
                   position: 'absolute',
                   left: '10%',
@@ -474,13 +494,218 @@ function App() {
             </div>
           </div>
         )}
+        {showBreakSetter && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#0097b2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '55%',
+              opacity: breakSetterVisible ? 1 : 0,
+              transform: breakSetterVisible ? 'scale(1)' : 'scale(0.96)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}>
+              <img src={breakSetTime} alt="How long do you want to take a break?" style={{ width: '100%', display: 'block' }} />
+              {/* X button hit area */}
+              <div
+                onClick={() => {
+                  setBreakSetterVisible(false)
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
+                    countdownAudioRef.current.play()
+                    countdownWasPlayingRef.current = false
+                  }
+                  setTimeout(() => setShowBreakSetter(false), 350)
+                }}
+                style={{
+                  position: 'absolute',
+                  left: '87%',
+                  top: '1%',
+                  width: '12%',
+                  height: '9%',
+                  cursor: 'pointer',
+                }}
+              />
+              {/* Input overlaid on break-setter image */}
+              <div style={{
+                position: 'absolute',
+                top: '58%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '70%',
+              }}>
+                <img src={breakSetter} alt="" style={{ width: '100%', display: 'block' }} />
+                <input
+                  type="text"
+                  value={breakTimerDigits ? (() => { const p = breakTimerDigits.padStart(6, '0'); return `${p.slice(0,2)}:${p.slice(2,4)}:${p.slice(4,6)}` })() : ''}
+                  placeholder="00:00:00"
+                  onChange={() => {}}
+                  onKeyDown={(e) => {
+                    if (e.key >= '0' && e.key <= '9' && breakTimerDigits.length < 6) {
+                      setBreakTimerDigits(prev => prev + e.key)
+                    } else if (e.key === 'Backspace') {
+                      setBreakTimerDigits(prev => prev.slice(0, -1))
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    textAlign: 'center',
+                    fontSize: '2.5vw',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: '600',
+                    color: '#444',
+                    boxSizing: 'border-box',
+                    cursor: 'text',
+                  }}
+                />
+              </div>
+              {/* Confirm button */}
+              <img
+                src={breakConfirm}
+                alt="Confirm"
+                onMouseEnter={(e) => (e.currentTarget.src = breakConfirmHover)}
+                onMouseLeave={(e) => (e.currentTarget.src = breakConfirm)}
+                onClick={() => {
+                  const secs = digitsToSeconds(breakTimerDigits)
+                  setBreakRemainingSeconds(secs)
+                  setBreakSetterVisible(false)
+                  setShowBreakCountdown(true)
+                  setTimeout(() => setBreakCountdownVisible(true), 20)
+                  setTimeout(() => setShowBreakSetter(false), 350)
+                  // Start break countdown only if time was entered
+                  if (secs <= 0) return
+                  let remaining = secs
+                  const iv = setInterval(() => {
+                    remaining -= 1
+                    setBreakRemainingSeconds(remaining)
+                    if (remaining <= 0) {
+                      clearInterval(iv)
+                      breakIntervalRef.current = null
+                    }
+                  }, 1000)
+                  breakIntervalRef.current = iv
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '74%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '70%',
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
+          </div>
+        )}
+        {showBreakCountdown && (
+          <div className="page-fade-in" style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#0097b2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 101,
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '55%',
+              opacity: breakCountdownVisible ? 1 : 0,
+              transform: breakCountdownVisible ? 'scale(1)' : 'scale(0.96)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}>
+              <img src={breakCountdown} alt="Break countdown" style={{ width: '100%', display: 'block' }} />
+              {/* X button hit area */}
+              <div
+                onClick={() => {
+                  setBreakCountdownVisible(false)
+                  if (breakIntervalRef.current) {
+                    clearInterval(breakIntervalRef.current)
+                    breakIntervalRef.current = null
+                  }
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
+                    countdownAudioRef.current.play()
+                    countdownWasPlayingRef.current = false
+                  }
+                  setTimeout(() => setShowBreakCountdown(false), 350)
+                }}
+                style={{
+                  position: 'absolute',
+                  left: '87%',
+                  top: '1%',
+                  width: '12%',
+                  height: '9%',
+                  cursor: 'pointer',
+                }}
+              />
+              {/* Break countdown timer display */}
+              <div style={{
+                position: 'absolute',
+                top: '57%',
+                left: '52%',
+                transform: 'translate(-50%, -50%)',
+                fontFamily: "'Share Tech Mono', monospace",
+                fontSize: '5vw',
+                fontWeight: '400',
+                color: '#222',
+                letterSpacing: '0.05em',
+                whiteSpace: 'nowrap',
+              }}>
+                {secondsToFormatted(breakRemainingSeconds)}
+              </div>
+              {/* relax */}
+              <img
+                src={relaxImg}
+                alt="Relax"
+                style={{
+                  position: 'absolute',
+                  top: '56%',
+                  left: '51%',
+                  transform: 'translateX(-50%)',
+                  width: '70%',
+                  pointerEvents: 'none',
+                  opacity: breakRemainingSeconds > 0 ? 1 : 0,
+                  transition: 'opacity 0.6s ease',
+                }}
+              />
+              {/* time is up */}
+              <img
+                src={timeIsUpImg}
+                alt="Time is up"
+                style={{
+                  position: 'absolute',
+                  top: '60%',
+                  left: '51%',
+                  transform: 'translateX(-50%)',
+                  width: '70%',
+                  pointerEvents: 'none',
+                  opacity: breakRemainingSeconds === 0 ? 1 : 0,
+                  transition: 'opacity 0.6s ease',
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     )
   }
 
   if (confirmed) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '24px' }}>
+      <div key="confirmed-page" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '24px' }}>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <p style={{ fontSize: '16px', fontWeight: 'bold', margin: 0 }}>timer inputted</p>
@@ -568,7 +793,7 @@ function App() {
     const year = sunday.getFullYear()
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#0097b2' }}>
+      <div key="productivity-page" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#0097b2' }}>
         <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '6px', boxSizing: 'border-box' }}>
           <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
             {rangeStart} – {rangeEnd}
@@ -693,7 +918,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
+    <div key="home-page" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
       <img src={homePage} alt="Home Page" style={{ maxWidth: '100%', maxHeight: '50vh', width: 'auto', height: 'auto' }} />
       <img
         src={productivityTrackerBtn}
