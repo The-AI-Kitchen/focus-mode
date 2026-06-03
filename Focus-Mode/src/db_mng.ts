@@ -1,4 +1,4 @@
-import { getLinks, loadLinks, saveLinks, type LinkEntry } from './db'
+import { getLinks, removeLink, loadLinks, saveLinks, type LinkEntry } from './db'
 
 // Sorts an array of links by website name in alphabetical order
 export function sortLinksByDomain(links: LinkEntry[]): LinkEntry[] {
