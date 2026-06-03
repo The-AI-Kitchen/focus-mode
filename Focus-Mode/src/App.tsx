@@ -21,6 +21,8 @@ import finishBtnHover from './assets/finish-work-hover.png'
 import takeABreak from './assets/take-a-break.png'
 import takeABreakHover from './assets/take-a-break-hover.png'
 import youDidGreat from './assets/you-did-great-job.png'
+import productivityTrackerBtn from './assets/productivity-tracker-button.png'
+import productivityTrackerBtnHover from './assets/productvity-tracker-button-hover.png'
 import confettiGif from './assets/confetti.gif'
 import alarmSound from './assets/ios_17_radial.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
@@ -534,7 +536,13 @@ function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
       <img src={homePage} alt="Home Page" style={{ maxWidth: '100%', maxHeight: '50vh', width: 'auto', height: 'auto' }} />
-
+      <img
+        src={productivityTrackerBtn}
+        alt="Productivity Tracker"
+        onMouseEnter={(e) => (e.currentTarget.src = productivityTrackerBtnHover)}
+        onMouseLeave={(e) => (e.currentTarget.src = productivityTrackerBtn)}
+        style={{ position: 'fixed', top: '16px', right: '16px', height: '44px', width: 'auto' }}
+      />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
         <input
           type="text"
