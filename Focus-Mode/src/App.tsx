@@ -178,31 +178,103 @@ function App() {
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [showCelebration])
 
-  const [condensedData, setCondensedData] = useState<{ siteName: string; timeSpent: number }[]>([])
+  // Merge sort implementation for sorting by timeSpent (descending by default)
+  function mergeSortByTimeSpent(
+    data: { siteName: string; timeSpent: number }[],
+    ascending = false
+  ): { siteName: string; timeSpent: number }[] {
+    if (data.length <= 1) return data
 
+    const mid = Math.floor(data.length / 2)
+    const left = mergeSortByTimeSpent(data.slice(0, mid), ascending)
+    const right = mergeSortByTimeSpent(data.slice(mid), ascending)
+
+    const merged: { siteName: string; timeSpent: number }[] = []
+    let i = 0, j = 0
+
+    while (i < left.length && j < right.length) {
+      const comparison = ascending
+        ? left[i].timeSpent - right[j].timeSpent
+        : right[j].timeSpent - left[i].timeSpent
+
+      if (comparison <= 0) {
+        merged.push(left[i])
+        i++
+      } else {
+        merged.push(right[j])
+        j++
+      }
+    }
+
+    return merged.concat(left.slice(i)).concat(right.slice(j))
+  }
+
+  // Prepare pie chart data: top 15 sites + "Other" for remaining
+  function preparePieChartData(
+    data: { siteName: string; timeSpent: number }[]
+  ): { siteName: string; timeSpent: number }[] {
+    const sorted = mergeSortByTimeSpent(data) // descending by default
+
+    if (sorted.length <= 15) return sorted
+
+    const topFifteen = sorted.slice(0, 15)
+    const others = sorted.slice(15)
+    const otherTimeSpent = others.reduce((sum, item) => sum + item.timeSpent, 0)
+
+    return [...topFifteen, { siteName: 'Other', timeSpent: otherTimeSpent }]
+  }
+
+  const [condensedData, setCondensedData] = useState<{ siteName: string; timeSpent: number }[]>([])
 
   useEffect(() => {
     const today = new Date().toDateString()
-    condenseLinksByDay(today).then((condensed) => setCondensedData(condensed)).catch(() => setCondensedData([]))
-  })
+    condenseLinksByDay(today)
+      .then((condensed) => setCondensedData(preparePieChartData(condensed)))
+      .catch(() => setCondensedData([]))
+  }, [])
 
-  /*Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
+  const COLORS: string[] = [
+  "#e64339", // 1. Red
+  "#eb5743", // 2. Light Red / Coral
+  "#ec5d2b", // 3. Red-Orange
+  "#ec782d", // 4. Orange
+  "#f18933", // 5. Light Orange
+  "#f3ab3b", // 6. Yellow-Orange
+  "#f7cb43", // 7. Dark Yellow
+  "#fad847", // 8. Medium Yellow
+  "#fdf454", // 9. Bright Yellow
+  "#dff855", // 10. Lime Yellow
+  "#9ef44f", // 11. Lime Green
+  "#6cf25a", // 12. Bright Green
+  "#62f281", // 13. Mint Green
+  "#66fbbd", // 14. Aquamarine
+  "#74fbfc", // 15. Cyan / Light Blue
+  "#60cef9"  // 16. Sky Blue
+];
+const totalTimeSpent = condensedData.reduce((sum, item) => sum + item.timeSpent, 0)
+
+const pieData = condensedData.map((item) => ({
+  ...item,
+  percentage: totalTimeSpent ? item.timeSpent / totalTimeSpent : 0,
+  arcLength: totalTimeSpent ? (item.timeSpent / totalTimeSpent) * 2 * Math.PI : 0,
+}))
+
+  //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
-          data={condensedData}
+          data={pieData}
           dataKey="timeSpent"
           nameKey="siteName"
           cx="50%"
           cy="50%"
           outerRadius={100}>
-            {condensedData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#87ceeb'][index % 5]} />
+            {pieData.map((_, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
-
         </Pie>
       </PieChart>
-    </ResponsiveContainer>*/
+    </ResponsiveContainer>
 
   useEffect(() => {
     if (!onNextPage) return
