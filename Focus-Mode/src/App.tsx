@@ -56,8 +56,8 @@ function App() {
   const [linkInput, setLinkInput] = useState('')
   const [linkError, setLinkError] = useState('')
   const [links, setLinks] = useState<LinkEntry[]>([])
-  const [showLinks, setShowLinks] = useState(false)
   const [confirmError, setConfirmError] = useState('')
+  const [showLinks, setShowLinks] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
   const [showProductivity, setShowProductivity] = useState(false)
@@ -82,6 +82,21 @@ function App() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const audioEnabledRef = useRef(false)
 
+  function sendMessage(msg: object) {
+    const chrome = (window as any).chrome
+    if (chrome?.runtime?.sendMessage) chrome.runtime.sendMessage(msg)
+  }
+
+  function resumeBlocking() {
+    getLinks().then((saved) => {
+      const domains = saved.map(l => l.url).map(url => {
+        try { return new URL(url.includes('://') ? url : `https://${url}`).hostname.replace(/^www\./, '') }
+        catch { return url }
+      }).filter(Boolean)
+      if (domains.length > 0) sendMessage({ type: 'START_BLOCKING', domains })
+    })
+  }
+
   function stopSession() {
     if (countdownAudioRef.current) {
       countdownAudioRef.current.pause()
@@ -98,6 +113,7 @@ function App() {
       intervalRef.current = null
     }
     audioEnabledRef.current = false
+    sendMessage({ type: 'STOP_BLOCKING' })
   }
   const [finishUsed, setFinishUsed] = useState(false)
   const [donutFading, setDonutFading] = useState(false)
@@ -119,6 +135,7 @@ function App() {
   const reminderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const breakAlarmRef = useRef<HTMLAudioElement | null>(null)
   const lofiAudioRef = useRef<HTMLAudioElement | null>(null)
+  const breakDismissedRef = useRef(false)
   const remainingRef = useRef(0)
   const isPausedRef = useRef(false)
   const countdownWasPlayingRef = useRef(false)
@@ -335,7 +352,10 @@ function App() {
   function fmtMs(ms: number) {
     const h = Math.floor(ms / 3600000)
     const m = Math.floor((ms % 3600000) / 60000)
-    return h > 0 ? `${h}h ${m}m` : `${m}m`
+    const s = Math.floor((ms % 60000) / 1000)
+    if (h > 0) return `${h}h ${m}m`
+    if (m > 0) return `${m}m ${s}s`
+    return `${s}s`
   }
 
   function renderPieChart(preparedData: { siteName: string; timeSpent: number }[]) {
@@ -420,8 +440,9 @@ function App() {
   }
 
   useEffect(() => {
+    if (!showProductivity) return
     void loadPieChartDataForDay(getTargetDate(selectedDay))
-  }, [statView, selectedDay])
+  }, [statView, selectedDay, showProductivity])
 
   // Real-time updates: re-fetch whenever background.js writes new tracking data
   useEffect(() => {
@@ -454,9 +475,22 @@ function App() {
       })
     }
     function onMouseUp() { statDragRef.current = null }
+    function onResize() {
+      const w = statWindowRef.current?.offsetWidth ?? 300
+      const h = statWindowRef.current?.offsetHeight ?? 400
+      setStatPos(prev => ({
+        left: Math.max(0, Math.min(prev.left, window.innerWidth - w)),
+        bottom: Math.max(0, Math.min(prev.bottom, window.innerHeight - h)),
+      }))
+    }
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
-    return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp) }
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
 
 useEffect(() => {
@@ -465,6 +499,15 @@ useEffect(() => {
     setRemainingSeconds(total)
     setShowDonut(false)
     audioEnabledRef.current = true
+
+    // Block saved sites for the duration of the session
+    getLinks().then((saved) => {
+      const domains = saved.map(l => l.url).map(url => {
+        try { return new URL(url.includes('://') ? url : `https://${url}`).hostname.replace(/^www\./, '') }
+        catch { return url }
+      }).filter(Boolean)
+      if (domains.length > 0) sendMessage({ type: 'START_BLOCKING', domains })
+    })
 
     // Pre-create audio so ref is always valid for stopSession()
     const cdAudio = new Audio(countdownSound)
@@ -533,6 +576,7 @@ useEffect(() => {
         clearInterval(interval)
         intervalRef.current = null
         setRemainingSeconds(0)
+        sendMessage({ type: 'STOP_BLOCKING' })
         if (audioEnabledRef.current) {
           const alarm = new Audio(alarmSound)
           alarmAudioRef.current = alarm
@@ -873,7 +917,9 @@ useEffect(() => {
                   setTimeout(() => setShowBreakSetter(false), 350)
                   // Start break countdown only if time was entered
                   if (secs <= 0) return
+                  sendMessage({ type: 'STOP_BLOCKING' })
                   // Start lofi
+                  breakDismissedRef.current = false
                   const lofi = new Audio(lofiBeat)
                   lofi.loop = true
                   lofi.volume = 1
@@ -901,6 +947,7 @@ useEffect(() => {
                             lofiAudioRef.current.pause()
                             lofiAudioRef.current = null
                           }
+                          if (breakDismissedRef.current) return
                           const alarm = new Audio(alarmSound)
                           breakAlarmRef.current = alarm
                           alarm.play()
@@ -943,6 +990,7 @@ useEffect(() => {
               {/* X button hit area */}
               <div
                 onClick={() => {
+                  breakDismissedRef.current = true
                   setBreakCountdownVisible(false)
                   if (breakIntervalRef.current) {
                     clearInterval(breakIntervalRef.current)
@@ -960,6 +1008,7 @@ useEffect(() => {
                   }
                   isPausedRef.current = false
                   if (countdownWasPlayingRef.current) resumeCountdown()
+                  resumeBlocking()
                   setTimeout(() => setShowBreakCountdown(false), 350)
                 }}
                 style={{
@@ -1007,6 +1056,7 @@ useEffect(() => {
                 alt="Time is up"
                 onClick={() => {
                   if (breakRemainingSeconds !== 0) return
+                  breakDismissedRef.current = true
                   setBreakCountdownVisible(false)
                   if (breakIntervalRef.current) {
                     clearInterval(breakIntervalRef.current)
@@ -1024,6 +1074,7 @@ useEffect(() => {
                   }
                   isPausedRef.current = false
                   if (countdownWasPlayingRef.current) resumeCountdown()
+                  resumeBlocking()
                   setTimeout(() => setShowBreakCountdown(false), 350)
                 }}
                 style={{

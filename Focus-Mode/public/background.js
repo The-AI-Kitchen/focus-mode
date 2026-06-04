@@ -1,3 +1,59 @@
+// ─── Site Blocking ────────────────────────────────────────────────────────
+
+const BLOCK_RULE_ID_START = 1000
+
+async function applyBlockRules(domains) {
+  const existingRules = await chrome.declarativeNetRequest.getDynamicRules()
+  const removeIds = existingRules
+    .filter(r => r.id >= BLOCK_RULE_ID_START)
+    .map(r => r.id)
+
+  const addRules = domains.map((domain, i) => ({
+    id: BLOCK_RULE_ID_START + i,
+    priority: 1,
+    action: { type: 'block' },
+    condition: {
+      urlFilter: `||${domain}^`,
+      resourceTypes: ['main_frame', 'sub_frame'],
+    },
+  }))
+
+  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds, addRules })
+
+  // Redirect already-open tabs that match a blocked domain
+  const tabs = await chrome.tabs.query({})
+  for (const tab of tabs) {
+    if (!tab.url || !tab.id) continue
+    try {
+      const hostname = new URL(tab.url).hostname.replace(/^www\./, '')
+      if (domains.some(d => hostname === d || hostname.endsWith(`.${d}`))) {
+        chrome.tabs.update(tab.id, { url: 'chrome://newtab' })
+      }
+    } catch {}
+  }
+}
+
+async function clearBlockRules() {
+  const existingRules = await chrome.declarativeNetRequest.getDynamicRules()
+  const removeIds = existingRules
+    .filter(r => r.id >= BLOCK_RULE_ID_START)
+    .map(r => r.id)
+  if (removeIds.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds, addRules: [] })
+  }
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === 'START_BLOCKING') {
+    applyBlockRules(message.domains).then(() => sendResponse({ ok: true }))
+    return true
+  }
+  if (message.type === 'STOP_BLOCKING') {
+    clearBlockRules().then(() => sendResponse({ ok: true }))
+    return true
+  }
+})
+
 // ─── Focus Mode – Background Service Worker ───────────────────────────────
 // Tracks real-time time spent per domain and saves it to chrome.storage.local.
 // Storage key format: "tracked_<dateString>"  e.g. "tracked_Wed Jun 04 2026"

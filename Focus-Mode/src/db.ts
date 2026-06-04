@@ -76,12 +76,12 @@ export async function addLink(url: string, siteName: string): Promise<LinkEntry>
   const entry: LinkEntry = {
     id: crypto.randomUUID(),
     url: url.trim(),
-    siteName: extractSiteName(siteName.trim() || url.trim()), //site name is extracted from url if not provided.
+    siteName: extractSiteName(siteName.trim() || url.trim()),
     accessedAt: Date.now(),
   }
   let links = await loadLinks()
   links.push(entry)
-  // Update duration of the previous link (O(1))
+  await saveLinks(links)
   await updatePreviousLinkDuration(links)
   return entry
 }
