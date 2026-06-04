@@ -13,6 +13,8 @@ import breakNo from './assets/break-no.png'
 import breakNoHover from './assets/break-no-hover.png'
 import breakSetTime from './assets/break-set-time.png'
 import breakCountdown from './assets/break-countdown.png'
+import warningWindow from './assets/warning-window.png'
+import reminderImg from './assets/reminder.png'
 import relaxImg from './assets/relax.png'
 import timeIsUpImg from './assets/time-is-up.png'
 import breakSetter from './assets/break-setter.png'
@@ -38,6 +40,7 @@ import yellowHighlight from './assets/yellow-highlight.png'
 import arrowDropdown from './assets/arrow-dropdown.png'
 import confettiGif from './assets/confetti.gif'
 import alarmSound from './assets/alarm-sound.mp3'
+import lofiBeat from './assets/lofi-beat-1.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
 import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
@@ -96,9 +99,29 @@ function App() {
   const [breakCountdownVisible, setBreakCountdownVisible] = useState(false)
   const [breakRemainingSeconds, setBreakRemainingSeconds] = useState(0)
   const breakIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [showWarning, setShowWarning] = useState(false)
+  const [warningVisible, setWarningVisible] = useState(false)
+  const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [showReminder, setShowReminder] = useState(false)
+  const [reminderVisible, setReminderVisible] = useState(false)
+  const reminderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const breakAlarmRef = useRef<HTMLAudioElement | null>(null)
+  const lofiAudioRef = useRef<HTMLAudioElement | null>(null)
   const remainingRef = useRef(0)
   const isPausedRef = useRef(false)
   const countdownWasPlayingRef = useRef(false)
+
+  function resumeCountdown() {
+    if (countdownAudioRef.current) {
+      // Resync audio position to match actual remaining time before resuming
+      const syncedTime = Math.max(0, 10 - remainingRef.current)
+      if (syncedTime < countdownAudioRef.current.duration) {
+        countdownAudioRef.current.currentTime = syncedTime
+      }
+      countdownAudioRef.current.play()
+    }
+    countdownWasPlayingRef.current = false
+  }
 
   function digitsToSeconds(digits: string): number {
     const padded = digits.padStart(6, '0')
@@ -263,14 +286,26 @@ function App() {
         oneThirdTriggered = true
         showMotivational()
       }
-      if (remaining === 11 && !countdownStarted && audioEnabledRef.current) {
+      if (remaining === 10 && !countdownStarted && audioEnabledRef.current) {
         countdownStarted = true
         cdAudio.currentTime = 0
         cdAudio.play()
+        isPausedRef.current = true
+        cdAudio.pause()
+        countdownWasPlayingRef.current = true
+        setShowWarning(true)
+        setTimeout(() => setWarningVisible(true), 20)
+        warningTimeoutRef.current = setTimeout(() => {
+          setWarningVisible(false)
+          isPausedRef.current = false
+          resumeCountdown()
+          setTimeout(() => setShowWarning(false), 400)
+        }, 3000)
+        return // prevent decrement so display stays at 10 while warning is up
       }
       // For timers shorter than 10s, start the countdown audio immediately at the
       // matching offset so the ticks line up with the remaining seconds
-      if (!countdownStarted && remaining < 11 && remaining >= 1 && audioEnabledRef.current) {
+      if (!countdownStarted && remaining < 10 && remaining >= 1 && audioEnabledRef.current) {
         countdownStarted = true
         cdAudio.currentTime = Math.max(0, 10 - remaining)
         cdAudio.play()
@@ -420,6 +455,48 @@ function App() {
             }}
           />
         </div>
+        {showWarning && (
+          <div className="page-fade-in" style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#0097b2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '55%',
+              opacity: warningVisible ? 1 : 0,
+              transform: warningVisible ? 'scale(1)' : 'scale(0.96)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}>
+              <img src={warningWindow} alt="Warning" style={{ width: '100%', display: 'block' }} />
+              {/* X button */}
+              <div
+                onClick={() => {
+                  if (warningTimeoutRef.current) {
+                    clearTimeout(warningTimeoutRef.current)
+                    warningTimeoutRef.current = null
+                  }
+                  setWarningVisible(false)
+                  isPausedRef.current = false
+                  resumeCountdown()
+                  setTimeout(() => setShowWarning(false), 400)
+                }}
+                style={{
+                  position: 'absolute',
+                  left: '87%',
+                  top: '1%',
+                  width: '12%',
+                  height: '9%',
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
+          </div>
+        )}
         {showBreak && (
           <div className="page-fade-in" style={{
             position: 'fixed',
@@ -437,10 +514,7 @@ function App() {
                 onClick={() => {
                   setShowBreak(false)
                   isPausedRef.current = false
-                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
-                    countdownAudioRef.current.play()
-                    countdownWasPlayingRef.current = false
-                  }
+                  if (countdownWasPlayingRef.current) resumeCountdown()
                 }}
                 style={{
                   position: 'absolute',
@@ -478,10 +552,7 @@ function App() {
                 onClick={() => {
                   setShowBreak(false)
                   isPausedRef.current = false
-                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
-                    countdownAudioRef.current.play()
-                    countdownWasPlayingRef.current = false
-                  }
+                  if (countdownWasPlayingRef.current) resumeCountdown()
                 }}
                 style={{
                   position: 'absolute',
@@ -517,10 +588,7 @@ function App() {
                 onClick={() => {
                   setBreakSetterVisible(false)
                   isPausedRef.current = false
-                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
-                    countdownAudioRef.current.play()
-                    countdownWasPlayingRef.current = false
-                  }
+                  if (countdownWasPlayingRef.current) resumeCountdown()
                   setTimeout(() => setShowBreakSetter(false), 350)
                 }}
                 style={{
@@ -586,6 +654,12 @@ function App() {
                   setTimeout(() => setShowBreakSetter(false), 350)
                   // Start break countdown only if time was entered
                   if (secs <= 0) return
+                  // Start lofi
+                  const lofi = new Audio(lofiBeat)
+                  lofi.loop = true
+                  lofi.volume = 1
+                  lofi.play()
+                  lofiAudioRef.current = lofi
                   let remaining = secs
                   const iv = setInterval(() => {
                     remaining -= 1
@@ -593,8 +667,26 @@ function App() {
                     if (remaining <= 0) {
                       clearInterval(iv)
                       breakIntervalRef.current = null
-                      const alarm = new Audio(alarmSound)
-                      alarm.play()
+                      // Fade lofi out over 800ms, then play alarm
+                      const fadeSteps = 20
+                      const fadeInterval = 800 / fadeSteps
+                      let step = 0
+                      const fade = setInterval(() => {
+                        step++
+                        if (lofiAudioRef.current) {
+                          lofiAudioRef.current.volume = Math.max(0, 1 - step / fadeSteps)
+                        }
+                        if (step >= fadeSteps) {
+                          clearInterval(fade)
+                          if (lofiAudioRef.current) {
+                            lofiAudioRef.current.pause()
+                            lofiAudioRef.current = null
+                          }
+                          const alarm = new Audio(alarmSound)
+                          breakAlarmRef.current = alarm
+                          alarm.play()
+                        }
+                      }, fadeInterval)
                     }
                   }, 1000)
                   breakIntervalRef.current = iv
@@ -637,11 +729,18 @@ function App() {
                     clearInterval(breakIntervalRef.current)
                     breakIntervalRef.current = null
                   }
-                  isPausedRef.current = false
-                  if (countdownWasPlayingRef.current && countdownAudioRef.current) {
-                    countdownAudioRef.current.play()
-                    countdownWasPlayingRef.current = false
+                  if (lofiAudioRef.current) {
+                    lofiAudioRef.current.pause()
+                    lofiAudioRef.current.currentTime = 0
+                    lofiAudioRef.current = null
                   }
+                  if (breakAlarmRef.current) {
+                    breakAlarmRef.current.pause()
+                    breakAlarmRef.current.currentTime = 0
+                    breakAlarmRef.current = null
+                  }
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current) resumeCountdown()
                   setTimeout(() => setShowBreakCountdown(false), 350)
                 }}
                 style={{
@@ -687,13 +786,35 @@ function App() {
               <img
                 src={timeIsUpImg}
                 alt="Time is up"
+                onClick={() => {
+                  if (breakRemainingSeconds !== 0) return
+                  setBreakCountdownVisible(false)
+                  if (breakIntervalRef.current) {
+                    clearInterval(breakIntervalRef.current)
+                    breakIntervalRef.current = null
+                  }
+                  if (lofiAudioRef.current) {
+                    lofiAudioRef.current.pause()
+                    lofiAudioRef.current.currentTime = 0
+                    lofiAudioRef.current = null
+                  }
+                  if (breakAlarmRef.current) {
+                    breakAlarmRef.current.pause()
+                    breakAlarmRef.current.currentTime = 0
+                    breakAlarmRef.current = null
+                  }
+                  isPausedRef.current = false
+                  if (countdownWasPlayingRef.current) resumeCountdown()
+                  setTimeout(() => setShowBreakCountdown(false), 350)
+                }}
                 style={{
                   position: 'absolute',
                   top: '60%',
                   left: '51%',
                   transform: 'translateX(-50%)',
                   width: '70%',
-                  pointerEvents: 'none',
+                  pointerEvents: breakRemainingSeconds === 0 ? 'auto' : 'none',
+                  cursor: breakRemainingSeconds === 0 ? 'pointer' : 'default',
                   opacity: breakRemainingSeconds === 0 ? 1 : 0,
                   transition: 'opacity 0.6s ease',
                 }}
@@ -766,12 +887,64 @@ function App() {
           <img
             src={nextBtn}
             alt="Next"
-            onClick={() => setOnNextPage(true)}
+            onClick={() => {
+              setShowReminder(true)
+              setTimeout(() => setReminderVisible(true), 20)
+              reminderTimeoutRef.current = setTimeout(() => {
+                setReminderVisible(false)
+                setTimeout(() => {
+                  setShowReminder(false)
+                  setOnNextPage(true)
+                }, 400)
+              }, 3000)
+            }}
             onMouseEnter={(e) => (e.currentTarget.src = nextBtnHover)}
             onMouseLeave={(e) => (e.currentTarget.src = nextBtn)}
             style={{ cursor: 'pointer', height: '44px', width: 'auto' }}
           />
         </div>
+        {showReminder && (
+          <div className="page-fade-in" style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#0097b2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 200,
+          }}>
+            <div style={{
+              position: 'relative',
+              width: '55%',
+              opacity: reminderVisible ? 1 : 0,
+              transform: reminderVisible ? 'scale(1)' : 'scale(0.96)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}>
+              <img src={reminderImg} alt="Reminder" style={{ width: '100%', display: 'block' }} />
+              <div
+                onClick={() => {
+                  if (reminderTimeoutRef.current) {
+                    clearTimeout(reminderTimeoutRef.current)
+                    reminderTimeoutRef.current = null
+                  }
+                  setReminderVisible(false)
+                  setTimeout(() => {
+                    setShowReminder(false)
+                    setOnNextPage(true)
+                  }, 400)
+                }}
+                style={{
+                  position: 'absolute',
+                  left: '87%',
+                  top: '1%',
+                  width: '12%',
+                  height: '9%',
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     )
   }
