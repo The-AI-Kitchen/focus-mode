@@ -36,6 +36,10 @@ import statsWeekTableBg from './assets/stats-week-table-bg.png'
 import tableLine from './assets/table-line.png'
 import miniClock from './assets/mini-clock.png'
 import hoursTotalBtn from './assets/hours-total-button.png'
+import statWindow from './assets/stat-window.png'
+import piButton from './assets/pi-button.png'
+import piChartPlaceholder from './assets/pi-chart-placeholder.png'
+import listButton from './assets/list-button.png'
 import yellowHighlight from './assets/yellow-highlight.png'
 import arrowDropdown from './assets/arrow-dropdown.png'
 import confettiGif from './assets/confetti.gif'
@@ -56,8 +60,15 @@ function App() {
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
   const [showProductivity, setShowProductivity] = useState(false)
+  const [statView, setStatView] = useState<'list' | 'chart'>('list')
+  const [statViewKey, setStatViewKey] = useState(0)
   const [arrowFlipped, setArrowFlipped] = useState<boolean[]>(Array(7).fill(false))
+  const [openStatDay, setOpenStatDay] = useState<number | null>(null)
+  const [statVisible, setStatVisible] = useState(false)
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay())
+  const [statPos, setStatPos] = useState({ left: 0, bottom: 0 })
+  const statDragRef = useRef<{ startMouseX: number; startMouseY: number; startLeft: number; startBottom: number } | null>(null)
+  const statWindowRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     getLinks().then((loaded) => setLinks(loaded)).catch(() => setLinks([]))
@@ -218,8 +229,8 @@ function App() {
   }
 
   useEffect(() => {
-    document.body.style.backgroundColor = onNextPage ? '#0097b2' : ''
-  }, [onNextPage])
+    document.body.style.backgroundColor = (onNextPage || showProductivity) ? '#0097b2' : ''
+  }, [onNextPage, showProductivity])
 
   useEffect(() => {
     if (!linkError) return
@@ -241,6 +252,24 @@ function App() {
   }, [showCelebration])
 
   useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (!statDragRef.current) return
+      const dx = e.clientX - statDragRef.current.startMouseX
+      const dy = e.clientY - statDragRef.current.startMouseY
+      const w = statWindowRef.current?.offsetWidth ?? 300
+      const h = statWindowRef.current?.offsetHeight ?? 400
+      setStatPos({
+        left: Math.max(0, Math.min(statDragRef.current.startLeft + dx, window.innerWidth - w)),
+        bottom: Math.max(0, Math.min(statDragRef.current.startBottom - dy, window.innerHeight - h)),
+      })
+    }
+    function onMouseUp() { statDragRef.current = null }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp) }
+  }, [])
+
+useEffect(() => {
     if (!onNextPage) return
     const total = digitsToSeconds(timerDigits || '000000')
     setRemainingSeconds(total)
@@ -949,12 +978,26 @@ function App() {
     )
   }
 
+  function handleSelectDay(i: number) {
+    setSelectedDay(i)
+    setArrowFlipped((prev) => prev.map((v, j) => j === i ? true : j === openStatDay ? false : v))
+    if (openStatDay === i) return
+    if (openStatDay !== null) {
+      setStatVisible(false)
+      setTimeout(() => { setOpenStatDay(i); setTimeout(() => setStatVisible(true), 30) }, 250)
+    } else {
+      setOpenStatDay(i)
+      setTimeout(() => setStatVisible(true), 20)
+    }
+  }
+
   if (showProductivity) {
     const today = new Date()
     const todayIndex = today.getDay()
     const sunday = new Date(today)
     sunday.setDate(today.getDate() - todayIndex)
     const dayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat']
+    const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     const fullMonthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     const saturday = new Date(sunday)
     saturday.setDate(sunday.getDate() + 6)
@@ -968,7 +1011,9 @@ function App() {
     const year = sunday.getFullYear()
 
     return (
-      <div key="productivity-page" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#0097b2' }}>
+      <div key="productivity-page" className="page-fade-in" style={{ height: '100vh', overflow: 'hidden', backgroundColor: '#0097b2', position: 'relative', boxSizing: 'border-box' }}>
+        {statView === 'list' ? (
+        <div key={`list-${statViewKey}`} className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', paddingTop: '6vh', boxSizing: 'border-box' }}>
         <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '6px', boxSizing: 'border-box' }}>
           <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
             {rangeStart} – {rangeEnd}
@@ -998,7 +1043,7 @@ function App() {
             return (
               <div
                 key={i}
-                onClick={() => setSelectedDay(i)}
+                onClick={() => handleSelectDay(i)}
                 style={{
                   position: 'absolute',
                   top: isSelected ? '0%' : '3%',
@@ -1053,7 +1098,15 @@ function App() {
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              onClick={() => setArrowFlipped((prev) => prev.map((v, j) => j === i ? !v : v))}
+              onClick={() => {
+                if (openStatDay === i) {
+                  setArrowFlipped((prev) => prev.map((v, j) => j === i ? false : v))
+                  setStatVisible(false)
+                  setTimeout(() => setOpenStatDay(null), 300)
+                } else {
+                  handleSelectDay(i)
+                }
+              }}
               style={{
                 position: 'absolute',
                 top: '62%',
@@ -1082,9 +1135,76 @@ function App() {
             </div>
           ))}
         </div>
+        </div>) : (
+          <div key="chart" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', paddingTop: '6vh', boxSizing: 'border-box' }}>
+            <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '6px', boxSizing: 'border-box' }}>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+                {fullDayNames[selectedDay]}, {weekDays[selectedDay].date}
+              </span>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+                {year}
+              </span>
+            </div>
+            <img
+              src={piChartPlaceholder}
+              alt="Pie chart"
+              onClick={() => { if (openStatDay === null) handleSelectDay(selectedDay) }}
+              style={{ maxHeight: '70vh', maxWidth: '70vw', width: 'auto', height: 'auto', marginTop: '3vh', cursor: openStatDay === null ? 'pointer' : 'default' }}
+            />
+          </div>
+        )}
+        {openStatDay !== null && (
+          <div
+            ref={statWindowRef}
+            onMouseDown={(e) => {
+              statDragRef.current = { startMouseX: e.clientX, startMouseY: e.clientY, startLeft: statPos.left, startBottom: statPos.bottom }
+              e.preventDefault()
+            }}
+            style={{
+              position: 'fixed',
+              left: statPos.left,
+              bottom: statPos.bottom,
+              opacity: statVisible ? 1 : 0,
+              transform: statVisible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.97)',
+              transition: 'opacity 0.25s ease, transform 0.25s ease',
+              cursor: 'grab',
+              userSelect: 'none',
+            }}
+          >
+            <img src={statWindow} alt="Stats" style={{ width: 'clamp(220px, 25vw, 400px)', display: 'block' }} />
+            <img
+              src={piButton}
+              alt="Chart view"
+              onClick={(e) => { e.stopPropagation(); setStatView('chart'); setStatViewKey(k => k + 1) }}
+              style={{ position: 'absolute', top: '2%', right: '33%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
+            />
+            <img
+              src={listButton}
+              alt="List view"
+              onClick={(e) => { e.stopPropagation(); setStatView('list'); setStatViewKey(k => k + 1) }}
+              style={{ position: 'absolute', top: '2%', right: '16%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
+            />
+            <div
+              onClick={(e) => {
+                e.stopPropagation()
+                setArrowFlipped((prev) => prev.map((v, j) => j === openStatDay ? false : v))
+                setStatVisible(false)
+                setTimeout(() => setOpenStatDay(null), 300)
+              }}
+              style={{
+                position: 'absolute',
+                top: '2%',
+                right: '2%',
+                width: '12%',
+                height: '8%',
+                cursor: 'pointer',
+              }}
+            />
+          </div>
+        )}
         <button
           onClick={() => setShowProductivity(false)}
-          style={{ marginTop: '24px', padding: '10px 28px', borderRadius: '999px', border: 'none', backgroundColor: '#4a4a4a', color: '#fff', fontSize: '16px', cursor: 'pointer' }}
+          style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', padding: '10px 28px', borderRadius: '999px', border: 'none', backgroundColor: '#4a4a4a', color: '#fff', fontSize: '16px', cursor: 'pointer', zIndex: 10 }}
         >
           Back
         </button>
