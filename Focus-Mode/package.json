@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "recharts": "^2.15.3",
     "vite-plugin-static-copy": "^4.1.0"
   },
   "devDependencies": {

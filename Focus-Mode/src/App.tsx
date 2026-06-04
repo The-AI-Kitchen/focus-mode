@@ -18,9 +18,9 @@ import alarmSound from './assets/ios_17_radial.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
 import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
-import { loadLinks, saveLinks, addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
-import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from 'recharts'
-import { sortLinksByDomain, condenseLinksByDay, getLinksByDay, deleteLinksByDay, performDailyArchive, getDayOfWeek} from './db_mng'
+import { addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { condenseLinksByDay } from './db_mng'
 
 function App() {
   const [timerDigits, setTimerDigits] = useState(loadTimer)
@@ -31,6 +31,10 @@ function App() {
   const [confirmError, setConfirmError] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [onNextPage, setOnNextPage] = useState(false)
+  const [showProductivity, setShowProductivity] = useState(false)
+  const [statView, setStatView] = useState<'list' | 'chart'>('list')
+  const [statViewKey, setStatViewKey] = useState(0)
+  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay())
 
   useEffect(() => {
     getLinks().then((loaded) => setLinks(loaded)).catch(() => setLinks([]))
@@ -156,8 +160,8 @@ function App() {
   }
 
   useEffect(() => {
-    document.body.style.backgroundColor = onNextPage ? '#0097b2' : ''
-  }, [onNextPage])
+    document.body.style.backgroundColor = (onNextPage || showProductivity) ? '#0097b2' : ''
+  }, [onNextPage, showProductivity])
 
   useEffect(() => {
     if (!linkError) return
@@ -227,11 +231,15 @@ function App() {
   const [condensedData, setCondensedData] = useState<{ siteName: string; timeSpent: number }[]>([])
 
   useEffect(() => {
-    const today = new Date().toDateString()
-    condenseLinksByDay(today)
+    const today = new Date()
+    const sunday = new Date(today)
+    sunday.setDate(today.getDate() - today.getDay())
+    const targetDate = new Date(sunday)
+    targetDate.setDate(sunday.getDate() + selectedDay)
+    condenseLinksByDay(targetDate.toDateString())
       .then((condensed) => setCondensedData(preparePieChartData(condensed)))
       .catch(() => setCondensedData([]))
-  }, [])
+  }, [selectedDay])
 
   const COLORS: string[] = [
   "#e64339", // 1. Red
@@ -260,6 +268,7 @@ const pieData = condensedData.map((item) => ({
 }))
 
   //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
+  const pieChartJSX = (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
@@ -275,6 +284,7 @@ const pieData = condensedData.map((item) => ({
         </Pie>
       </PieChart>
     </ResponsiveContainer>
+  )
 
   useEffect(() => {
     if (!onNextPage) return
@@ -438,6 +448,113 @@ const pieData = condensedData.map((item) => ({
     )
   }
 
+  if (showProductivity) {
+    const today = new Date()
+    const todayIndex = today.getDay()
+    const sunday = new Date(today)
+    sunday.setDate(today.getDate() - todayIndex)
+    const dayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat']
+    const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const fullMonthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const saturday = new Date(sunday)
+    saturday.setDate(sunday.getDate() + 6)
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(sunday)
+      d.setDate(sunday.getDate() + i)
+      return { name: dayNames[i], date: `${fullMonthNames[d.getMonth()]} ${d.getDate()}` }
+    })
+    const rangeStart = `Sun, ${fullMonthNames[sunday.getMonth()]} ${sunday.getDate()}`
+    const rangeEnd = `Sat, ${fullMonthNames[saturday.getMonth()]} ${saturday.getDate()}`
+    const year = sunday.getFullYear()
+
+    const totalMs = condensedData.reduce((s, d) => s + d.timeSpent, 0)
+    const fmtDuration = (ms: number) => {
+      const h = Math.floor(ms / 3600000)
+      const m = Math.floor((ms % 3600000) / 60000)
+      return h > 0 ? `${h}h ${m}m` : `${m}m`
+    }
+
+    return (
+      <div key="productivity-page" className="page-fade-in" style={{ height: '100vh', overflow: 'hidden', backgroundColor: '#0097b2', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '6vh', boxSizing: 'border-box', position: 'relative' }}>
+
+        {/* Header: date range + year */}
+        <div style={{ display: 'flex', gap: '6%', marginBottom: '12px' }}>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '2vw', color: '#fff' }}>{rangeStart} – {rangeEnd}</span>
+          <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '2vw', color: '#fff' }}>{year}</span>
+        </div>
+
+        {/* Day selector */}
+        <div style={{ display: 'flex', width: 'calc(100% - 80px)', marginBottom: '16px', borderRadius: '14px', overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.15)' }}>
+          {weekDays.map((day, i) => (
+            <div
+              key={i}
+              onClick={() => setSelectedDay(i)}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                textAlign: 'center',
+                cursor: 'pointer',
+                backgroundColor: i === selectedDay ? 'rgba(255,255,255,0.35)' : 'transparent',
+                transition: 'background-color 0.2s ease',
+                borderRadius: i === selectedDay ? '10px' : '0',
+              }}
+            >
+              <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: '1.4vw', color: '#fff' }}>{day.name}</div>
+              <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 400, fontSize: '1vw', color: 'rgba(255,255,255,0.85)' }}>{day.date}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* View toggle buttons */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+          <button
+            onClick={() => { setStatView('list'); setStatViewKey(k => k + 1) }}
+            style={{ padding: '6px 20px', borderRadius: '999px', border: 'none', backgroundColor: statView === 'list' ? '#fff' : 'rgba(255,255,255,0.25)', color: statView === 'list' ? '#0097b2' : '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}
+          >☰ List</button>
+          <button
+            onClick={() => { setStatView('chart'); setStatViewKey(k => k + 1) }}
+            style={{ padding: '6px 20px', borderRadius: '999px', border: 'none', backgroundColor: statView === 'chart' ? '#fff' : 'rgba(255,255,255,0.25)', color: statView === 'chart' ? '#0097b2' : '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}
+          >◉ Chart</button>
+        </div>
+
+        {/* Content area */}
+        <div key={`view-${statViewKey}`} className="page-fade-in" style={{ width: 'calc(100% - 80px)', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: statView === 'chart' ? 'column' : 'row', gap: '20px', alignItems: statView === 'chart' ? 'center' : 'flex-start' }}>
+
+          {statView === 'chart' ? (
+            <>
+              <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '1.6vw', color: '#fff' }}>
+                {fullDayNames[selectedDay]}, {weekDays[selectedDay].date} — {totalMs > 0 ? fmtDuration(totalMs) + ' total' : 'No data'}
+              </div>
+              <div style={{ width: '100%', maxWidth: '500px' }}>
+                {pieChartJSX}
+              </div>
+            </>
+          ) : (
+            <div style={{ width: '100%', maxHeight: '55vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {condensedData.length === 0 ? (
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'Nunito, sans-serif', fontSize: '16px', textAlign: 'center', paddingTop: '40px' }}>No data for this day</div>
+              ) : condensedData.map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: '10px', padding: '10px 16px' }}>
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: COLORS[i % COLORS.length], flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 600, fontSize: '15px', color: '#fff', flex: 1 }}>{item.siteName}</span>
+                  <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: '14px', color: 'rgba(255,255,255,0.8)' }}>{fmtDuration(item.timeSpent)}</span>
+                  <div style={{ width: '120px', height: '6px', borderRadius: '3px', backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${totalMs > 0 ? (item.timeSpent / totalMs) * 100 : 0}%`, backgroundColor: COLORS[i % COLORS.length], borderRadius: '3px' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setShowProductivity(false)}
+          style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', padding: '10px 28px', borderRadius: '999px', border: 'none', backgroundColor: '#4a4a4a', color: '#fff', fontSize: '16px', cursor: 'pointer', zIndex: 10 }}
+        >Back</button>
+      </div>
+    )
+  }
+
   if (confirmed) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '24px' }}>
@@ -512,6 +629,10 @@ const pieData = condensedData.map((item) => ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', minHeight: '100vh', paddingTop: '4vh' }}>
       <img src={homePage} alt="Home Page" style={{ maxWidth: '100%', maxHeight: '50vh', width: 'auto', height: 'auto' }} />
+      <button
+        onClick={() => setShowProductivity(true)}
+        style={{ position: 'fixed', top: '16px', right: '16px', padding: '8px 20px', borderRadius: '999px', border: 'none', backgroundColor: '#0097b2', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+      >Productivity Tracker</button>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '24px' }}>
         <input

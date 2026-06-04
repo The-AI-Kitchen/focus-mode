@@ -14,6 +14,9 @@ export default defineConfig({
       ],
     }),
   ],
+  optimizeDeps: {
+    include: ['recharts'],
+  },
   build: {
     outDir: 'build',
     rollupOptions: {
