@@ -38,7 +38,7 @@ import miniClock from './assets/mini-clock.png'
 import hoursTotalBtn from './assets/hours-total-button.png'
 import statWindow from './assets/stat-window.png'
 import piButton from './assets/pi-button.png'
-import piChartPlaceholder from './assets/pi-chart-placeholder.png'
+
 import listButton from './assets/list-button.png'
 import yellowHighlight from './assets/yellow-highlight.png'
 import arrowDropdown from './assets/arrow-dropdown.png'
@@ -288,68 +288,92 @@ function App() {
   function preparePieChartData(
     data: { siteName: string; timeSpent: number }[]
   ): { siteName: string; timeSpent: number }[] {
-    const sorted = mergeSortByTimeSpent(data) // descending by default
+    if (data.length <= 15) return data
 
-    if (sorted.length <= 15) return sorted
-
-    const topFifteen = sorted.slice(0, 15)
-    const others = sorted.slice(15)
+    const topFifteen = data.slice(0, 15)
+    const others = data.slice(15)
     const otherTimeSpent = others.reduce((sum, item) => sum + item.timeSpent, 0)
 
     return [...topFifteen, { siteName: 'Other', timeSpent: otherTimeSpent }]
   }
 
-  const [condensedData, setCondensedData] = useState<{ siteName: string; timeSpent: number }[]>([])
+  const [selectedDayPieData, setSelectedDayPieData] = useState<{ siteName: string; timeSpent: number }[]>([])
+  const [isPieChartLoading, setIsPieChartLoading] = useState(false)
 
-  useEffect(() => {
-    const today = new Date().toDateString()
-    condenseLinksByDay(today)
-      .then((condensed) => setCondensedData(preparePieChartData(condensed)))
-      .catch(() => setCondensedData([]))
-  }, [])
+  async function loadPieChartDataForDay(date: Date | string) {
+    setIsPieChartLoading(true)
+    try {
+      const linksForDay = await getLinksByDay(date)
+      if (linksForDay.length === 0) {
+        setSelectedDayPieData([])
+        return
+      }
+
+      const condensed = await condenseLinksByDay(date)
+      const sorted = mergeSortByTimeSpent(condensed)
+      const prepared = preparePieChartData(sorted)
+      setSelectedDayPieData(prepared)
+    } catch {
+      setSelectedDayPieData([])
+    } finally {
+      setIsPieChartLoading(false)
+    }
+  }
 
   const COLORS: string[] = [
-  "#e64339", // 1. Red
-  "#eb5743", // 2. Light Red / Coral
-  "#ec5d2b", // 3. Red-Orange
-  "#ec782d", // 4. Orange
-  "#f18933", // 5. Light Orange
-  "#f3ab3b", // 6. Yellow-Orange
-  "#f7cb43", // 7. Dark Yellow
-  "#fad847", // 8. Medium Yellow
-  "#fdf454", // 9. Bright Yellow
-  "#dff855", // 10. Lime Yellow
-  "#9ef44f", // 11. Lime Green
-  "#6cf25a", // 12. Bright Green
-  "#62f281", // 13. Mint Green
-  "#66fbbd", // 14. Aquamarine
-  "#74fbfc", // 15. Cyan / Light Blue
-  "#60cef9"  // 16. Sky Blue
-];
-const totalTimeSpent = condensedData.reduce((sum, item) => sum + item.timeSpent, 0)
+    "#e64339", // 1. Red
+    "#eb5743", // 2. Light Red / Coral
+    "#ec5d2b", // 3. Red-Orange
+    "#ec782d", // 4. Orange
+    "#f18933", // 5. Light Orange
+    "#f3ab3b", // 6. Yellow-Orange
+    "#f7cb43", // 7. Dark Yellow
+    "#fad847", // 8. Medium Yellow
+    "#fdf454", // 9. Bright Yellow
+    "#dff855", // 10. Lime Yellow
+    "#9ef44f", // 11. Lime Green
+    "#6cf25a", // 12. Bright Green
+    "#62f281", // 13. Mint Green
+    "#66fbbd", // 14. Aquamarine
+    "#74fbfc", // 15. Cyan / Light Blue
+    "#60cef9"  // 16. Sky Blue
+  ]
 
-const pieData = condensedData.map((item) => ({
-  ...item,
-  percentage: totalTimeSpent ? item.timeSpent / totalTimeSpent : 0,
-  arcLength: totalTimeSpent ? (item.timeSpent / totalTimeSpent) * 2 * Math.PI : 0,
-}))
+  function renderPieChart(preparedData: { siteName: string; timeSpent: number }[]) {
+    if (preparedData.length === 0) {
+      return (
+        <div style={{ color: '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, marginTop: '8vh' }}>
+          No usage data for this day.
+        </div>
+      )
+    }
 
-  //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={pieData}
-          dataKey="timeSpent"
-          nameKey="siteName"
-          cx="50%"
-          cy="50%"
-          outerRadius={100}>
-            {pieData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-        </Pie>
-      </PieChart>
-    </ResponsiveContainer>
+    const totalTimeSpent = preparedData.reduce((sum, item) => sum + item.timeSpent, 0)
+    const pieData = preparedData.map((item) => ({
+      ...item,
+      percentage: totalTimeSpent ? item.timeSpent / totalTimeSpent : 0,
+      arcLength: totalTimeSpent ? (item.timeSpent / totalTimeSpent) * 2 * Math.PI : 0,
+    }))
+
+    //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={pieData}
+            dataKey="timeSpent"
+            nameKey="siteName"
+            cx="50%"
+            cy="50%"
+            outerRadius={100}>
+              {pieData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+    )
+  }
 
   useEffect(() => {
     function onMouseMove(e: MouseEvent) {
@@ -1245,12 +1269,15 @@ useEffect(() => {
                 {year}
               </span>
             </div>
-            <img
-              src={piChartPlaceholder}
-              alt="Pie chart"
-              onClick={() => { if (openStatDay === null) handleSelectDay(selectedDay) }}
-              style={{ maxHeight: '70vh', maxWidth: '70vw', width: 'auto', height: 'auto', marginTop: '3vh', cursor: openStatDay === null ? 'pointer' : 'default' }}
-            />
+            <div style={{ width: '70vw', maxWidth: '900px', height: '70vh', maxHeight: '600px', marginTop: '3vh' }}>
+              {isPieChartLoading ? (
+                <div style={{ color: '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, marginTop: '8vh', textAlign: 'center' }}>
+                  Loading chart...
+                </div>
+              ) : (
+                renderPieChart(selectedDayPieData)
+              )}
+            </div>
           </div>
         )}
         {openStatDay !== null && (
@@ -1275,7 +1302,13 @@ useEffect(() => {
             <img
               src={piButton}
               alt="Chart view"
-              onClick={(e) => { e.stopPropagation(); setStatView('chart'); setStatViewKey(k => k + 1) }}
+              onClick={(e) => {
+                e.stopPropagation()
+                const selectedDate = new Date(`${weekDays[selectedDay].date}, ${year}`)
+                void loadPieChartDataForDay(selectedDate)
+                setStatView('chart')
+                setStatViewKey(k => k + 1)
+              }}
               style={{ position: 'absolute', top: '2%', right: '33%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
             />
             <img
