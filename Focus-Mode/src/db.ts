@@ -112,6 +112,28 @@ export async function removeLink(id: string): Promise<void> {
   await saveLinks(links)
 }
 
+// Returns real-time tracked time per domain for a given day.
+// Data is written by background.js and keyed as "tracked_<dateString>".
+export async function getTrackedTimeByDay(date: Date | string): Promise<{ siteName: string; timeSpent: number }[]> {
+  const dateKey = `tracked_${new Date(date).toDateString()}`
+
+  let data: Record<string, number> = {}
+
+  const chromeResult = await chromeStorageGet<Record<string, number>>(dateKey)
+  if (chromeResult !== undefined) {
+    data = chromeResult
+  } else {
+    try {
+      const raw = localStorage.getItem(dateKey)
+      if (raw) data = JSON.parse(raw)
+    } catch {}
+  }
+
+  return Object.entries(data)
+    .map(([siteName, timeSpent]) => ({ siteName, timeSpent }))
+    .sort((a, b) => b.timeSpent - a.timeSpent)
+}
+
 export function saveTimer(digits: string): void {
   localStorage.setItem(TIMER_KEY, digits)
 }

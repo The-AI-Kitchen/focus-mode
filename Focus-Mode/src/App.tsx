@@ -48,9 +48,8 @@ import lofiBeat from './assets/lofi-beat-1.mp3'
 import countdownSound from './assets/timer-countdown.mp3'
 import partyHorn from './assets/party-horn-short.mp3'
 import './App.css'
-import { loadLinks, saveLinks, addLink, getLinks, removeLink, saveTimer, loadTimer, type LinkEntry } from './db'
-import {PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer} from 'recharts'
-import { sortLinksByDomain, condenseLinksByDay, getLinksByDay, deleteLinksByDay, performDailyArchive, getDayOfWeek} from './db_mng'
+import { addLink, getLinks, removeLink, saveTimer, loadTimer, getTrackedTimeByDay, type LinkEntry } from './db'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 
 function App() {
   const [timerDigits, setTimerDigits] = useState(loadTimer)
@@ -303,14 +302,8 @@ function App() {
   async function loadPieChartDataForDay(date: Date | string) {
     setIsPieChartLoading(true)
     try {
-      const linksForDay = await getLinksByDay(date)
-      if (linksForDay.length === 0) {
-        setSelectedDayPieData([])
-        return
-      }
-
-      const condensed = await condenseLinksByDay(date)
-      const sorted = mergeSortByTimeSpent(condensed)
+      const tracked = await getTrackedTimeByDay(date)
+      const sorted = mergeSortByTimeSpent(tracked)
       const prepared = preparePieChartData(sorted)
       setSelectedDayPieData(prepared)
     } catch {
@@ -417,14 +410,35 @@ function App() {
     )
   }
 
-  useEffect(() => {
-    if (statView !== 'chart') return
+  function getTargetDate(dayIndex: number) {
     const today = new Date()
     const sunday = new Date(today)
     sunday.setDate(today.getDate() - today.getDay())
-    const targetDate = new Date(sunday)
-    targetDate.setDate(sunday.getDate() + selectedDay)
-    void loadPieChartDataForDay(targetDate)
+    const target = new Date(sunday)
+    target.setDate(sunday.getDate() + dayIndex)
+    return target
+  }
+
+  useEffect(() => {
+    void loadPieChartDataForDay(getTargetDate(selectedDay))
+  }, [statView, selectedDay])
+
+  // Real-time updates: re-fetch whenever background.js writes new tracking data
+  useEffect(() => {
+    const chrome = (window as any).chrome
+    if (!chrome?.storage?.onChanged) return
+
+    const todayKey = `tracked_${new Date().toDateString()}`
+
+    function handleStorageChange(changes: Record<string, any>) {
+      if (!(todayKey in changes)) return
+      if (selectedDay === new Date().getDay()) {
+        void loadPieChartDataForDay(getTargetDate(selectedDay))
+      }
+    }
+
+    chrome.storage.onChanged.addListener(handleStorageChange)
+    return () => chrome.storage.onChanged.removeListener(handleStorageChange)
   }, [statView, selectedDay])
 
   useEffect(() => {
@@ -1360,35 +1374,57 @@ useEffect(() => {
               userSelect: 'none',
             }}
           >
-            <img src={statWindow} alt="Stats" style={{ width: 'clamp(220px, 25vw, 400px)', display: 'block' }} />
-            <img
-              src={piButton}
-              alt="Chart view"
-              onClick={(e) => { e.stopPropagation(); setStatView('chart'); setStatViewKey(k => k + 1) }}
-              style={{ position: 'absolute', top: '2%', right: '33%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
-            />
-            <img
-              src={listButton}
-              alt="List view"
-              onClick={(e) => { e.stopPropagation(); setStatView('list'); setStatViewKey(k => k + 1) }}
-              style={{ position: 'absolute', top: '2%', right: '16%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
-            />
-            <div
-              onClick={(e) => {
-                e.stopPropagation()
-                setArrowFlipped((prev) => prev.map((v, j) => j === openStatDay ? false : v))
-                setStatVisible(false)
-                setTimeout(() => setOpenStatDay(null), 300)
-              }}
-              style={{
-                position: 'absolute',
-                top: '2%',
-                right: '2%',
-                width: '12%',
-                height: '8%',
-                cursor: 'pointer',
-              }}
-            />
+            {/* Popup card */}
+            <div style={{ width: 'clamp(240px, 27vw, 420px)', backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', overflow: 'hidden', fontFamily: 'Nunito, sans-serif' }}>
+              {/* Header bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', padding: '10px 12px 6px' }}>
+                <img src={piButton} alt="Chart view" onClick={(e) => { e.stopPropagation(); setStatView('chart'); setStatViewKey(k => k + 1) }} style={{ width: 36, cursor: 'pointer', userSelect: 'none' }} />
+                <img src={listButton} alt="List view" onClick={(e) => { e.stopPropagation(); setStatView('list'); setStatViewKey(k => k + 1) }} style={{ width: 36, cursor: 'pointer', userSelect: 'none' }} />
+                <img
+                  src={statWindow}
+                  alt="Close"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setArrowFlipped(prev => prev.map((v, j) => j === openStatDay ? false : v))
+                    setStatVisible(false)
+                    setTimeout(() => setOpenStatDay(null), 300)
+                  }}
+                  style={{ width: 28, cursor: 'pointer', userSelect: 'none', display: 'none' }}
+                />
+                {/* X button */}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setArrowFlipped(prev => prev.map((v, j) => j === openStatDay ? false : v))
+                    setStatVisible(false)
+                    setTimeout(() => setOpenStatDay(null), 300)
+                  }}
+                  style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#ff4d4d', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+                >
+                  <span style={{ color: '#fff', fontWeight: 900, fontSize: '14px', lineHeight: 1, userSelect: 'none' }}>✕</span>
+                </div>
+              </div>
+
+              {/* Site list */}
+              <div style={{ padding: '4px 16px 14px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '55vh', overflowY: 'auto' }}>
+                {selectedDayPieData.length === 0 ? (
+                  <div style={{ color: '#aaa', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>No data for this day</div>
+                ) : (() => {
+                  const maxTime = Math.max(...selectedDayPieData.map(s => s.timeSpent))
+                  return selectedDayPieData.map((site, i) => (
+                    <div key={site.siteName}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                        <span style={{ fontWeight: 700, fontSize: 'clamp(13px, 1.2vw, 16px)', color: '#222', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{site.siteName}</span>
+                        <span style={{ fontSize: 'clamp(11px, 1vw, 14px)', color: '#888', flexShrink: 0 }}>{fmtMs(site.timeSpent)}</span>
+                      </div>
+                      <div style={{ height: '6px', borderRadius: '3px', backgroundColor: '#eee', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${(site.timeSpent / maxTime) * 100}%`, backgroundColor: COLORS[i % COLORS.length], borderRadius: '3px', transition: 'width 0.4s ease' }} />
+                      </div>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
           </div>
         )}
         <button
@@ -1396,6 +1432,22 @@ useEffect(() => {
           style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', padding: '10px 28px', borderRadius: '999px', border: 'none', backgroundColor: '#4a4a4a', color: '#fff', fontSize: '16px', cursor: 'pointer', zIndex: 10 }}
         >
           Back
+        </button>
+      </div>
+    )
+  }
+
+  const isPopup = !new URLSearchParams(window.location.search).has('fullpage')
+
+  if (isPopup) {
+    return (
+      <div style={{ width: 380, height: 200, backgroundColor: '#0097b2', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: '22px', color: '#fff' }}>Focus Mode</span>
+        <button
+          onClick={() => (window as any).chrome.tabs.create({ url: (window as any).chrome.runtime.getURL('index.html') + '?fullpage=1' })}
+          style={{ padding: '12px 32px', borderRadius: '999px', border: 'none', backgroundColor: '#fff', color: '#0097b2', fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: '15px', cursor: 'pointer' }}
+        >
+          ↗ Open App
         </button>
       </div>
     )
