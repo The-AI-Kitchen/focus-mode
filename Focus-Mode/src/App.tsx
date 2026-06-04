@@ -334,7 +334,7 @@ const pieData = condensedData.map((item) => ({
   arcLength: totalTimeSpent ? (item.timeSpent / totalTimeSpent) * 2 * Math.PI : 0,
 }))
 
-  //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
+  /*Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
@@ -349,7 +349,7 @@ const pieData = condensedData.map((item) => ({
             ))}
         </Pie>
       </PieChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer>*/
 
   useEffect(() => {
     function onMouseMove(e: MouseEvent) {
