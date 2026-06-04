@@ -339,11 +339,19 @@ function App() {
     "#60cef9"  // 16. Sky Blue
   ]
 
+  function fmtMs(ms: number) {
+    const h = Math.floor(ms / 3600000)
+    const m = Math.floor((ms % 3600000) / 60000)
+    return h > 0 ? `${h}h ${m}m` : `${m}m`
+  }
+
   function renderPieChart(preparedData: { siteName: string; timeSpent: number }[]) {
     if (preparedData.length === 0) {
       return (
-        <div style={{ color: '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, marginTop: '8vh' }}>
-          No usage data for this day.
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Nunito, sans-serif', fontWeight: 600, fontSize: 'clamp(14px, 1.4vw, 20px)' }}>
+            No usage data for this day.
+          </span>
         </div>
       )
     }
@@ -351,29 +359,73 @@ function App() {
     const totalTimeSpent = preparedData.reduce((sum, item) => sum + item.timeSpent, 0)
     const pieData = preparedData.map((item) => ({
       ...item,
-      percentage: totalTimeSpent ? item.timeSpent / totalTimeSpent : 0,
-      arcLength: totalTimeSpent ? (item.timeSpent / totalTimeSpent) * 2 * Math.PI : 0,
+      percentage: totalTimeSpent ? Math.round((item.timeSpent / totalTimeSpent) * 100) : 0,
     }))
 
-    //Pie chart: attributes in the <Pie> component = visuals can be edited, focus on everything in the {}.
     return (
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={pieData}
-            dataKey="timeSpent"
-            nameKey="siteName"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}>
-              {pieData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+      <div style={{ display: 'flex', gap: '2vw', alignItems: 'stretch', width: '100%', height: '100%' }}>
+
+        {/* Pie chart panel */}
+        <div style={{ flex: '0 0 42%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '20px', padding: '20px' }}>
+          <div style={{ width: '100%', flex: 1 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="timeSpent"
+                  nameKey="siteName"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius="78%"
+                  innerRadius="40%"
+                  strokeWidth={0}
+                  paddingAngle={2}
+                >
+                  {pieData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number, name: string) => [fmtMs(value), name]}
+                  contentStyle={{ backgroundColor: 'rgba(20,20,20,0.85)', border: 'none', borderRadius: '10px', fontFamily: 'Nunito, sans-serif', color: '#fff', fontSize: '14px', padding: '8px 14px' }}
+                  itemStyle={{ color: '#fff' }}
+                  labelStyle={{ display: 'none' }}
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '8px' }}>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 800, fontSize: 'clamp(18px, 2vw, 28px)', color: '#fff' }}>{fmtMs(totalTimeSpent)}</div>
+            <div style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 400, fontSize: 'clamp(11px, 1vw, 14px)', color: 'rgba(255,255,255,0.55)', marginTop: '2px' }}>total tracked</div>
+          </div>
+        </div>
+
+        {/* Legend list panel */}
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 2px' }}>
+          {pieData.map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '10px 16px' }}>
+              <div style={{ width: 12, height: 12, borderRadius: '3px', backgroundColor: COLORS[i % COLORS.length], flexShrink: 0 }} />
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 'clamp(13px, 1.3vw, 18px)', color: '#fff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.siteName}</span>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontSize: 'clamp(12px, 1.1vw, 16px)', color: 'rgba(255,255,255,0.65)', flexShrink: 0 }}>{fmtMs(item.timeSpent)}</span>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 'clamp(12px, 1.1vw, 16px)', color: COLORS[i % COLORS.length], flexShrink: 0, minWidth: '3ch', textAlign: 'right' }}>{item.percentage}%</span>
+            </div>
+          ))}
+        </div>
+
+      </div>
     )
   }
+
+  useEffect(() => {
+    if (statView !== 'chart') return
+    const today = new Date()
+    const sunday = new Date(today)
+    sunday.setDate(today.getDate() - today.getDay())
+    const targetDate = new Date(sunday)
+    targetDate.setDate(sunday.getDate() + selectedDay)
+    void loadPieChartDataForDay(targetDate)
+  }, [statView, selectedDay])
 
   useEffect(() => {
     function onMouseMove(e: MouseEvent) {
@@ -1260,19 +1312,29 @@ useEffect(() => {
           ))}
         </div>
         </div>) : (
-          <div key="chart" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', paddingTop: '6vh', boxSizing: 'border-box' }}>
-            <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '6px', boxSizing: 'border-box' }}>
-              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+          <div key="chart" className="page-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', paddingTop: '6vh', paddingBottom: '80px', boxSizing: 'border-box' }}>
+            {/* Header row */}
+            <div style={{ width: 'calc(100% - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6%', marginBottom: '20px', boxSizing: 'border-box', position: 'relative' }}>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '2vw', color: '#fff' }}>
                 {fullDayNames[selectedDay]}, {weekDays[selectedDay].date}
               </span>
-              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: '700', fontSize: '2vw', color: '#fff' }}>
+              <span style={{ fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: '2vw', color: '#fff' }}>
                 {year}
               </span>
+              {openStatDay === null && (
+                <button
+                  onClick={() => handleSelectDay(selectedDay)}
+                  style={{ position: 'absolute', right: 0, padding: '10px 22px', borderRadius: '999px', border: '1.5px solid rgba(255,255,255,0.5)', backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, fontSize: 'clamp(13px, 1.2vw, 17px)', cursor: 'pointer', backdropFilter: 'blur(4px)' }}
+                >
+                  ↑ stats
+                </button>
+              )}
             </div>
-            <div style={{ width: '70vw', maxWidth: '900px', height: '70vh', maxHeight: '600px', marginTop: '3vh' }}>
+            {/* Chart area */}
+            <div style={{ width: 'calc(100% - 80px)', flex: 1, minHeight: 0 }}>
               {isPieChartLoading ? (
-                <div style={{ color: '#fff', fontFamily: 'Nunito, sans-serif', fontWeight: 700, marginTop: '8vh', textAlign: 'center' }}>
-                  Loading chart...
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.6)', fontFamily: 'Nunito, sans-serif', fontWeight: 600, fontSize: 'clamp(13px, 1.2vw, 18px)' }}>
+                  Loading…
                 </div>
               ) : (
                 renderPieChart(selectedDayPieData)
@@ -1302,13 +1364,7 @@ useEffect(() => {
             <img
               src={piButton}
               alt="Chart view"
-              onClick={(e) => {
-                e.stopPropagation()
-                const selectedDate = new Date(`${weekDays[selectedDay].date}, ${year}`)
-                void loadPieChartDataForDay(selectedDate)
-                setStatView('chart')
-                setStatViewKey(k => k + 1)
-              }}
+              onClick={(e) => { e.stopPropagation(); setStatView('chart'); setStatViewKey(k => k + 1) }}
               style={{ position: 'absolute', top: '2%', right: '33%', width: '14%', cursor: 'pointer', userSelect: 'none' }}
             />
             <img
