@@ -48,7 +48,7 @@ async function clearBlockRules() {
   await chrome.storage.local.set({ focusBlocking: false, blockedDomains: [] })
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'START_BLOCKING') {
     applyBlockRules(message.domains).then(() => sendResponse({ ok: true }))
     return true
@@ -56,6 +56,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'STOP_BLOCKING') {
     clearBlockRules().then(() => sendResponse({ ok: true }))
     return true
+  }
+  if (message.type === 'REDIRECT_TAB') {
+    if (sender.tab?.id) {
+      chrome.tabs.update(sender.tab.id, { url: 'chrome://newtab' })
+    }
   }
 })
 

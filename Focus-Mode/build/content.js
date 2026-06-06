@@ -12,7 +12,8 @@
       const domains = result.blockedDomains || []
       const isBlocked = domains.some(d => hostname === d || hostname.endsWith(`.${d}`))
       if (isBlocked) {
-        location.replace('chrome://newtab')
+        // content scripts can't navigate to chrome:// URLs directly — ask background to do it
+        chrome.runtime.sendMessage({ type: 'REDIRECT_TAB' })
       }
     })
   } catch {}
