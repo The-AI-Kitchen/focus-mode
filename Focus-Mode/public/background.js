@@ -20,6 +20,9 @@ async function applyBlockRules(domains) {
 
   await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds, addRules })
 
+  // Persist blocking state so the content script can read it
+  await chrome.storage.local.set({ focusBlocking: true, blockedDomains: domains })
+
   // Redirect already-open tabs that match a blocked domain
   const tabs = await chrome.tabs.query({})
   for (const tab of tabs) {
@@ -41,6 +44,8 @@ async function clearBlockRules() {
   if (removeIds.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: removeIds, addRules: [] })
   }
+  // Clear blocking state so the content script stops redirecting
+  await chrome.storage.local.set({ focusBlocking: false, blockedDomains: [] })
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
