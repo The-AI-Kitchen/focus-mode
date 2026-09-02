@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { digitsToSeconds } from '../utils/timerUtils'
-import countdownSound from '../assets/timer-countdown.mp3'
-import alarmSound from '../assets/alarm-sound.mp3'
+import { AUDIO_PATHS, stopAudio } from '../audio/audioManager'
 
 export function useTimer(onNextPage: boolean) {
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
@@ -18,16 +17,10 @@ export function useTimer(onNextPage: boolean) {
   const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   function stopSession() {
-    if (countdownAudioRef.current) {
-      countdownAudioRef.current.pause()
-      countdownAudioRef.current.currentTime = 0
-      countdownAudioRef.current = null
-    }
-    if (alarmAudioRef.current) {
-      alarmAudioRef.current.pause()
-      alarmAudioRef.current.currentTime = 0
-      alarmAudioRef.current = null
-    }
+    stopAudio(countdownAudioRef.current)
+    countdownAudioRef.current = null
+    stopAudio(alarmAudioRef.current)
+    alarmAudioRef.current = null
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -89,7 +82,7 @@ export function useTimerInterval(timerDigits: string, onNextPage: boolean, timer
     setRemainingSeconds(total)
     audioEnabledRef.current = true
 
-    const cdAudio = new Audio(countdownSound)
+    const cdAudio = new Audio(AUDIO_PATHS.countdown)
     cdAudio.currentTime = 0
     countdownAudioRef.current = cdAudio
 
@@ -147,7 +140,7 @@ export function useTimerInterval(timerDigits: string, onNextPage: boolean, timer
         intervalRef.current = null
         setRemainingSeconds(0)
         if (audioEnabledRef.current) {
-          const alarm = new Audio(alarmSound)
+          const alarm = new Audio(AUDIO_PATHS.alarm)
           alarmAudioRef.current = alarm
           alarm.play()
         }
