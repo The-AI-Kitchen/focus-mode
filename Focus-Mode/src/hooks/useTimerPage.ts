@@ -19,6 +19,5 @@ export function useTimerPage() {
     showCelebration,
     setShowCelebration,
     celebrationFading,
-    setCelebrationFading,
   }
 }

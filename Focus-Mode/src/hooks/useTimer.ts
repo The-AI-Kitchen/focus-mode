@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { digitsToSeconds } from '../utils/timerUtils'
 import { AUDIO_PATHS, stopAudio } from '../audio/audioManager'
 
-export function useTimer(onNextPage: boolean) {
+export function useTimer() {
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
   const [showWarning, setShowWarning] = useState(false)
   const [warningVisible, setWarningVisible] = useState(false)
@@ -86,13 +86,14 @@ export function useTimerInterval(timerDigits: string, onNextPage: boolean, timer
     cdAudio.currentTime = 0
     countdownAudioRef.current = cdAudio
 
-    let lastMotivationalImg: string | null = null
-    const pickMotivational = () => {
-      const choices = motivationalImages.filter(img => img !== lastMotivationalImg)
-      const picked = choices[Math.floor(Math.random() * choices.length)]
-      lastMotivationalImg = picked
-      return picked
-    }
+    // TODO: pickMotivational will be used later
+    // let lastMotivationalImg: string | null = null
+    // const pickMotivational = () => {
+    //   const choices = motivationalImages.filter(img => img !== lastMotivationalImg)
+    //   const picked = choices[Math.floor(Math.random() * choices.length)]
+    //   lastMotivationalImg = picked
+    //   return picked
+    // }
 
     let oneThirdTriggered = false
     let twoThirdsTriggered = false

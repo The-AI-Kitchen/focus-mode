@@ -23,11 +23,8 @@ export function useMotivational() {
 
   return {
     showDonut,
-    setShowDonut,
     motivationalImg,
-    setMotivationalImg,
     donutFading,
-    setDonutFading,
     showMotivational,
     MOTIVATIONAL_IMAGES,
   }

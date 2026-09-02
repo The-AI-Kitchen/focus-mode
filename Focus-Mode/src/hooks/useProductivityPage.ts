@@ -73,19 +73,12 @@ export function useProductivityPage() {
   return {
     // State
     statView,
-    setStatView,
     arrowFlipped,
-    setArrowFlipped,
     openStatDay,
-    setOpenStatDay,
     statVisible,
-    setStatVisible,
     selectedDay,
-    setSelectedDay,
     statPos,
-    setStatPos,
     // References
-    statDragRef,
     statWindowRef,
     // Handlers
     handleSelectDay,

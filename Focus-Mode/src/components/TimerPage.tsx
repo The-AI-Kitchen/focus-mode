@@ -1,4 +1,11 @@
+//Libraries
 import React from 'react'
+import { secondsToFormatted } from '../utils/timerUtils'
+// import partyHorn from '../assets/party-horn-short.mp3'
+// import lofiBeat from '../assets/lofi-beat-1.mp3'
+// import alarmSound from '../assets/alarm-sound.mp3'
+
+//Assets
 import Computer from '../assets/Computer.png'
 import timerImg from '../assets/timer.png'
 import confettiGif from '../assets/confetti.gif'
@@ -21,11 +28,8 @@ import breakConfirmHover from '../assets/break-confirm-hover.png'
 import breakCountdown from '../assets/break-countdown.png'
 import relaxImg from '../assets/relax.png'
 import timeIsUpImg from '../assets/time-is-up.png'
-import partyHorn from '../assets/party-horn-short.mp3'
-import lofiBeat from '../assets/lofi-beat-1.mp3'
-import alarmSound from '../assets/alarm-sound.mp3'
-import { secondsToFormatted, digitsToSeconds } from '../utils/timerUtils'
 
+//Typescript interface for props
 interface TimerPageProps {
   remainingSeconds: number
   showCelebration: boolean
@@ -43,8 +47,6 @@ interface TimerPageProps {
   showBreakCountdown: boolean
   breakCountdownVisible: boolean
   breakRemainingSeconds: number
-  isPausedRef: React.MutableRefObject<boolean>
-  countdownWasPlayingRef: React.MutableRefObject<boolean>
   onExit: () => void
   onFinish: () => void
   onTakeBreak: () => void
@@ -76,8 +78,6 @@ export function TimerPage({
   showBreakCountdown,
   breakCountdownVisible,
   breakRemainingSeconds,
-  isPausedRef,
-  countdownWasPlayingRef,
   onExit,
   onFinish,
   onTakeBreak,

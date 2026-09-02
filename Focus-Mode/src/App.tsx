@@ -25,7 +25,7 @@ function App() {
   const linkManager = useLinkManager()
 
   // Hooks for different features
-  const timerState = useTimer(onNextPage)
+  const timerState = useTimer()
   const breakTimer = useBreakTimer(timerState.isPausedRef, timerState.countdownWasPlayingRef, timerState.resumeCountdown)
   const motivational = useMotivational()
   const confirmationFlow = useConfirmationFlow()
@@ -152,8 +152,6 @@ function App() {
         showBreakCountdown={breakTimer.showBreakCountdown}
         breakCountdownVisible={breakTimer.breakCountdownVisible}
         breakRemainingSeconds={breakTimer.breakRemainingSeconds}
-        isPausedRef={timerState.isPausedRef}
-        countdownWasPlayingRef={timerState.countdownWasPlayingRef}
         onExit={handleExit}
         onFinish={handleFinish}
         onTakeBreak={handleTakeBreak}
