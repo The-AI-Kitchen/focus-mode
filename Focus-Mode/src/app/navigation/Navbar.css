@@ -4,8 +4,8 @@
   align-content: center;
   box-sizing: border-box;
   height: var(--navbar-height);
-  padding: 0 0.5rem 0 0;
-  background-color: #ffffff;
+  background: none;
+  width: 100%;
 }
 
 .navbar__links {
@@ -17,25 +17,65 @@
   justify-content: space-evenly;
   flex-basis: fit-content;
   padding: 0 0.5rem;
-  background: rgb(105, 105, 219); /* change l8r */
+  background: var(--focusmode-blue); 
 }
 
 .navbar__link {
   background: none;
   border: none;
   padding: 0 0.5rem;
-  font: inherit; /* will change */
+  font: var(--atkinson-hyperlegible); 
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-style: normal;
+  font-size: 1rem;
   line-height: 2rem;
-  color: #222;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
+}
+
+.nav_button_container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+  border: none;
+  flex-grow: 1;
+  height: 100%;
+  background: var(--navbar-gradient);
+}
+
+.navbar-hamburger-button {
+  display: flex;
+  align-self: center;
+  background: none;
+  border: none;
+  padding: 0.35rem 0.2rem;
+  cursor: pointer;
+  
+}
+
+
+
+#hamburgerbtn {
+  width: 2.5rem;
+  height: 2.5rem;
+  box-sizing:border-box;
+  border: none;
+  background: none;
 }
 
 .navbar__link--inactive {
   cursor: default;
 }
 
+.navbar__link.active {
+  color: var(--light-yellow);
+  font-weight: 650;
+}
+
 .navbar__link:hover {
-    color: #6600ff;
-    font-weight: 900;
+    color: var(--light-yellow);
+    font-weight: 650;
 }
