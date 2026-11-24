@@ -1,0 +1,56 @@
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import type { LinkManager } from '../features/links/hooks/useLinkManager'
+import { ConfirmedPage } from '../pages/Confirmed/ConfirmedPage'
+import { HomePage } from '../pages/Home/HomePage'
+import { ProductivityPage } from '../pages/Productivity/ProductivityPage'
+import { TimerPage } from '../pages/Timer/TimerPage'
+import { AppLayout } from './layout/AppLayout'
+import { PATHS } from './navigation/paths'
+
+interface AppRoutesProps {
+  /** Session setup shared between pages. */
+  timerDigits: string
+  onTimerKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  linkManager: LinkManager
+}
+
+/** The app's route table: maps each path to its page and wires the page's navigation callbacks. */
+export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoutesProps) {
+  const navigate = useNavigate()
+
+  return (
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route
+          path={PATHS.home}
+          element={
+            <HomePage
+              timerDigits={timerDigits}
+              onTimerKeyDown={onTimerKeyDown}
+              linkManager={linkManager}
+              onConfirmed={() => navigate(PATHS.confirmed)}
+              onOpenProductivity={() => navigate(PATHS.productivity)}
+            />
+          }
+        />
+        <Route
+          path={PATHS.confirmed}
+          element={
+            <ConfirmedPage
+              timerDigits={timerDigits}
+              links={linkManager.links}
+              onGoBack={() => navigate(PATHS.home)}
+              onStart={() => navigate(PATHS.timer)}
+            />
+          }
+        />
+        <Route
+          path={PATHS.timer}
+          element={<TimerPage timerDigits={timerDigits} onExit={() => navigate(PATHS.home)} />}
+        />
+        <Route path={PATHS.productivity} element={<ProductivityPage onBack={() => navigate(PATHS.home)} />} />
+        <Route path="*" element={<Navigate to={PATHS.home} replace />} />
+      </Route>
+    </Routes>
+  )
+}

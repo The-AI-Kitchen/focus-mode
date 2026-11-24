@@ -1,5 +1,5 @@
 .productivity-page {
-  height: 100vh;
+  height: calc(100vh - var(--navbar-height));
   overflow: hidden;
   background-color: #0097b2;
   position: relative;
