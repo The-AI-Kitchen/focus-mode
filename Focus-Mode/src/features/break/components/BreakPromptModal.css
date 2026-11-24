@@ -1,15 +1,14 @@
-.break-prompt__yes,
-.break-prompt__no {
+.pill-button.break-prompt__yes,
+.pill-button.break-prompt__no {
   position: absolute;
   bottom: 9%;
   width: 36%;
-  cursor: pointer;
 }
 
-.break-prompt__yes {
+.pill-button.break-prompt__yes {
   left: 10%;
 }
 
-.break-prompt__no {
+.pill-button.break-prompt__no {
   right: 10%;
 }

@@ -1,10 +1,7 @@
-import nextBtn from '../../assets/btn-next.png'
-import nextBtnHover from '../../assets/btn-next-hover.png'
 import { ConfirmedSummary } from '../../features/confirmation/components/ConfirmedSummary'
 import { ReminderOverlay } from '../../features/confirmation/components/ReminderOverlay'
 import { useReminder } from '../../features/confirmation/hooks/useReminder'
 import type { LinkEntry } from '../../features/links/types'
-import { HoverImage } from '../../shared/components/HoverImage'
 import { PillButton } from '../../shared/components/PillButton'
 import './ConfirmedPage.css'
 
@@ -25,11 +22,9 @@ export function ConfirmedPage({ timerDigits, links, onGoBack, onStart }: Confirm
 
       <div className="confirmed-page__actions">
         <PillButton onClick={onGoBack}>Go Back</PillButton>
-        <HoverImage
-          className="confirmed-page__next"
-          src={nextBtn}
-          hoverSrc={nextBtnHover}
-          alt="Next"
+        <PillButton
+          text="Next"
+          style={{ background: 'var(--btn-gradient-green)', border: 'none', color: '#fff', fontWeight: '650', fontSize: '1em'}}
           onClick={reminder.start}
         />
       </div>
@@ -38,3 +33,4 @@ export function ConfirmedPage({ timerDigits, links, onGoBack, onStart }: Confirm
     </div>
   )
 }
+

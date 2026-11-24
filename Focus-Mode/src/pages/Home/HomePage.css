@@ -14,13 +14,10 @@
   height: auto;
 }
 
-.home-page__productivity-button {
+.pill-button.home-page__productivity-button {
   position: fixed;
   top: calc(var(--navbar-height) + 16px);
   right: 16px;
-  height: 44px;
-  width: auto;
-  cursor: pointer;
 }
 
 .home-page__content {

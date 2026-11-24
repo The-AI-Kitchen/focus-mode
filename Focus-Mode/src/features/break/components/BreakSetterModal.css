@@ -28,11 +28,10 @@
   cursor: text;
 }
 
-.break-setter__confirm {
+.pill-button.break-setter__confirm {
   position: absolute;
   top: 74%;
   left: 50%;
   transform: translateX(-50%);
   width: 70%;
-  cursor: pointer;
 }

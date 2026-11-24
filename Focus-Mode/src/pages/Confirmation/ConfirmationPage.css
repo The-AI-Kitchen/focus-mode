@@ -7,3 +7,15 @@
   min-height: calc(100vh - var(--navbar-height));
   padding-top: 8vh;
 }
+
+.confirmation-page__confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.confirmation-page__error {
+  color: #c0392b;
+  font-size: 14px;
+}

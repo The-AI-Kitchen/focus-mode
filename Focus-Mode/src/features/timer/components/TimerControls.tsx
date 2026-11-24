@@ -1,9 +1,5 @@
 import exitBtn from '../../../assets/exit-button.png'
-import finishBtn from '../../../assets/finish-work.png'
-import finishBtnHover from '../../../assets/finish-work-hover.png'
-import takeABreak from '../../../assets/take-a-break.png'
-import takeABreakHover from '../../../assets/take-a-break-hover.png'
-import { HoverImage } from '../../../shared/components/HoverImage'
+import { PillButton } from '../../../shared/components/PillButton'
 import { cx } from '../../../shared/utils/classNames'
 import './TimerControls.css'
 
@@ -20,22 +16,19 @@ export function TimerControls({ finishUsed, canTakeBreak, onExit, onFinish, onTa
   return (
     <>
       <img className="timer-controls__exit" src={exitBtn} alt="Exit" onClick={onExit} />
-      <HoverImage
+      <PillButton
         className={cx('timer-controls__finish', finishUsed && 'is-disabled')}
-        src={finishBtn}
-        hoverSrc={finishBtnHover}
-        hoverDisabled={finishUsed}
-        alt="Finish Work"
+        text="Finish Work"
+        style={{ background: 'var(--btn-gradient-green)', border: 'none', color: '#000', fontWeight: '400', fontSize: '1em' }}
         onClick={onFinish}
       />
-      <HoverImage
+      <PillButton
         className={cx('timer-controls__break', !canTakeBreak && 'is-disabled')}
-        src={takeABreak}
-        hoverSrc={takeABreakHover}
-        hoverDisabled={!canTakeBreak}
-        alt="Take a Break"
+        text="Take a Break"
+        style={{ background: 'var(--btn-gradient-orange)', border: 'none', color: '#000', fontWeight: '400', fontSize: '1em'}}
         onClick={onTakeBreak}
       />
     </>
   )
 }
+

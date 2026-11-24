@@ -1,8 +1,6 @@
 import breakSetTime from '../../../assets/break-set-time.png'
 import breakSetter from '../../../assets/break-setter.png'
-import breakConfirm from '../../../assets/break-confirm.png'
-import breakConfirmHover from '../../../assets/break-confirm-hover.png'
-import { HoverImage } from '../../../shared/components/HoverImage'
+import { PillButton } from '../../../shared/components/PillButton'
 import { ImageModal } from '../../../shared/components/ImageModal'
 import { formatTimerDigits } from '../../../shared/utils/timer'
 import './BreakSetterModal.css'
@@ -30,13 +28,13 @@ export function BreakSetterModal({ visible, digits, onKeyDown, onConfirm, onClos
           onKeyDown={onKeyDown}
         />
       </div>
-      <HoverImage
+      <PillButton
         className="break-setter__confirm"
-        src={breakConfirm}
-        hoverSrc={breakConfirmHover}
-        alt="Confirm"
+        text="Confirm"
+        style={{ background: 'var(--btn-gradient-green)', border: 'none', color: '#000', fontWeight: '400', fontSize: '2vw', padding: '0.5em 0' }}
         onClick={onConfirm}
       />
     </ImageModal>
   )
 }
+

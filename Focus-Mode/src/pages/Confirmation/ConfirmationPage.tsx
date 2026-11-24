@@ -1,5 +1,5 @@
-import { ConfirmButton } from '../../features/confirmation/components/ConfirmButton'
 import { useConfirmValidation } from '../../features/confirmation/hooks/useConfirmValidation'
+import { PillButton } from '../../shared/components/PillButton'
 import { LinkForm } from '../../features/links/components/LinkForm'
 import { LinkList } from '../../features/links/components/LinkList'
 import type { LinkManager } from '../../features/links/hooks/useLinkManager'
@@ -34,8 +34,17 @@ export function ConfirmationPage({ timerDigits, onTimerKeyDown, linkManager, onC
         onAddLink={linkManager.handleAddLink}
         onToggleShowLinks={linkManager.toggleShowLinks}
       />
-      <ConfirmButton error={confirmError} onConfirm={handleConfirm} />
+      <div className="confirmation-page__confirm">
+        <PillButton
+          text="Confirm"
+          style={{ background: 'var(--btn-gradient-green)', border: 'none', color: '#fff', fontWeight: '650', fontSize: '1em' }}
+          onClick={handleConfirm}
+        />
+        {confirmError && <span className="confirmation-page__error">{confirmError}</span>}
+      </div>
       {linkManager.showLinks && <LinkList links={linkManager.links} onRemove={linkManager.handleRemoveLink} />}
     </div>
   )
 }
+
+

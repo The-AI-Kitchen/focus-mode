@@ -1,10 +1,6 @@
 import breakWindow from '../../../assets/break-window.png'
-import breakYes from '../../../assets/break-yes.png'
-import breakYesHover from '../../../assets/break-yes-hover.png'
-import breakNo from '../../../assets/break-no.png'
-import breakNoHover from '../../../assets/break-no-hover.png'
-import { HoverImage } from '../../../shared/components/HoverImage'
 import { ImageModal } from '../../../shared/components/ImageModal'
+import { PillButton } from '../../../shared/components/PillButton'
 import './BreakPromptModal.css'
 
 interface BreakPromptModalProps {
@@ -16,20 +12,19 @@ interface BreakPromptModalProps {
 export function BreakPromptModal({ onYes, onNo }: BreakPromptModalProps) {
   return (
     <ImageModal image={breakWindow} alt="Break window" fadeBackdropIn tallCloseArea onClose={onNo}>
-      <HoverImage
+      <PillButton
         className="break-prompt__yes"
-        src={breakYes}
-        hoverSrc={breakYesHover}
-        alt="Yes"
+        text="Yes"
+        style={{ background: 'var(--btn-gradient-green)', border: 'none', color: '#000', fontWeight: '400', fontSize: '1em'}}
         onClick={onYes}
       />
-      <HoverImage
+      <PillButton
         className="break-prompt__no"
-        src={breakNo}
-        hoverSrc={breakNoHover}
-        alt="No"
+        text="No"
+        style={{ background: 'none', border: '4px solid #000', color: '#000', fontWeight: '400', fontSize: '1em'}}
         onClick={onNo}
       />
     </ImageModal>
   )
 }
+
