@@ -1,0 +1,26 @@
+.timer-page {
+  height: 100vh;
+  background-color: #0097b2;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.timer-page__stage {
+  position: relative;
+  width: 100%;
+  max-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.timer-page__computer {
+  display: block;
+  width: 100%;
+  max-height: 100vh;
+  object-fit: contain;
+  object-position: bottom;
+}

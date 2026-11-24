@@ -1,0 +1,12 @@
+.day-pie-chart {
+  max-height: 70vh;
+  max-width: 70vw;
+  width: auto;
+  height: auto;
+  margin-top: 3vh;
+  cursor: default;
+}
+
+.day-pie-chart.is-clickable {
+  cursor: pointer;
+}

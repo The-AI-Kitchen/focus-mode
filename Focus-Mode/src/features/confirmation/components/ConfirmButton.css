@@ -1,0 +1,16 @@
+.confirm-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.confirm-button__image {
+  cursor: pointer;
+  max-width: 200px;
+}
+
+.confirm-button__error {
+  color: #c0392b;
+  font-size: 14px;
+}

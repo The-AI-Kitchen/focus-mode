@@ -1,7 +1,7 @@
-import alarmSound from '../assets/alarm-sound.mp3'
-import lofiBeat from '../assets/lofi-beat-1.mp3'
-import countdownSound from '../assets/timer-countdown.mp3'
-import partyHorn from '../assets/party-horn-short.mp3'
+import alarmSound from '../../assets/alarm-sound.mp3'
+import lofiBeat from '../../assets/lofi-beat-1.mp3'
+import countdownSound from '../../assets/timer-countdown.mp3'
+import partyHorn from '../../assets/party-horn-short.mp3'
 
 export const AUDIO_PATHS = {
   alarm: alarmSound,

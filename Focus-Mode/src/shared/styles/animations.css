@@ -1,0 +1,30 @@
+@keyframes badgePop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+  65%  { transform: translate(-50%, -50%) scale(1.12) rotate(3deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes donutPopIn {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes donutPopOut {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-fade-in {
+  animation: pageFadeIn 0.4s ease forwards;
+}

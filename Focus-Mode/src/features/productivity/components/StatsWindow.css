@@ -1,0 +1,43 @@
+.stats-window {
+  position: fixed;
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  cursor: grab;
+  user-select: none;
+}
+
+.stats-window.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.stats-window__image {
+  width: clamp(220px, 25vw, 400px);
+  display: block;
+}
+
+.stats-window__view-button {
+  position: absolute;
+  top: 2%;
+  width: 14%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stats-window__view-button--chart {
+  right: 33%;
+}
+
+.stats-window__view-button--list {
+  right: 16%;
+}
+
+.stats-window__close {
+  position: absolute;
+  top: 2%;
+  right: 2%;
+  width: 12%;
+  height: 8%;
+  cursor: pointer;
+}

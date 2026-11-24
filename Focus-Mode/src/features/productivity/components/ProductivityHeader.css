@@ -1,0 +1,16 @@
+.productivity-header {
+  width: calc(100% - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6%;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+}
+
+.productivity-header__text {
+  font-family: Nunito, sans-serif;
+  font-weight: 700;
+  font-size: 2vw;
+  color: #fff;
+}

@@ -1,157 +1,72 @@
-import { useState, useRef, useEffect } from 'react'
-import { digitsToSeconds } from '../utils/timerUtils'
-import { AUDIO_PATHS, stopAudio } from '../audio/audioManager'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLatest } from '../../../shared/hooks/useLatest'
+import type { TimerHandlers } from '../types'
 
-export function useTimer() {
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
-  const [showWarning, setShowWarning] = useState(false)
-  const [warningVisible, setWarningVisible] = useState(false)
-  
-  const countdownAudioRef = useRef<HTMLAudioElement | null>(null)
-  const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const audioEnabledRef = useRef(false)
-  const remainingRef = useRef(0)
+const TICK_MS = 1000
+
+/**
+ * Owns the countdown: the remaining time, the one-second interval, and the paused flag.
+ *
+ * It knows nothing about audio, warnings or breaks. Those features react to the
+ * `onStart` / `onTick` / `onComplete` handlers and use `pause` / `resume` to control it.
+ * The session starts when the hook mounts and restarts if `totalSeconds` changes.
+ */
+export function useTimer(totalSeconds: number, handlers: TimerHandlers = {}) {
+  const [remainingSeconds, setRemainingSeconds] = useState(totalSeconds)
+  const remainingRef = useRef(totalSeconds)
   const isPausedRef = useRef(false)
-  const countdownWasPlayingRef = useRef(false)
-  const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Handlers are read through a ref so the interval is not recreated on every render.
+  const handlersRef = useLatest(handlers)
 
-  function stopSession() {
-    stopAudio(countdownAudioRef.current)
-    countdownAudioRef.current = null
-    stopAudio(alarmAudioRef.current)
-    alarmAudioRef.current = null
+  const stop = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
-    audioEnabledRef.current = false
-  }
+  }, [])
 
-  function resumeCountdown() {
-    if (countdownAudioRef.current) {
-      const syncedTime = Math.max(0, 10 - remainingRef.current)
-      if (syncedTime < countdownAudioRef.current.duration) {
-        countdownAudioRef.current.currentTime = syncedTime
-      }
-      countdownAudioRef.current.play()
-    }
-    countdownWasPlayingRef.current = false
-  }
+  const pause = useCallback(() => {
+    isPausedRef.current = true
+  }, [])
 
-  return {
-    remainingSeconds,
-    setRemainingSeconds,
-    showWarning,
-    setShowWarning,
-    warningVisible,
-    setWarningVisible,
-    countdownAudioRef,
-    alarmAudioRef,
-    intervalRef,
-    audioEnabledRef,
-    remainingRef,
-    isPausedRef,
-    countdownWasPlayingRef,
-    warningTimeoutRef,
-    stopSession,
-    resumeCountdown,
-  }
-}
-
-export function useTimerInterval(timerDigits: string, onNextPage: boolean, timerState: ReturnType<typeof useTimer>, motivationalImages: string[], showMotivationalCallback: () => void) {
-  const {
-    remainingSeconds,
-    setRemainingSeconds,
-    setShowWarning,
-    setWarningVisible,
-    countdownAudioRef,
-    alarmAudioRef,
-    intervalRef,
-    audioEnabledRef,
-    remainingRef,
-    isPausedRef,
-    countdownWasPlayingRef,
-    warningTimeoutRef,
-    resumeCountdown,
-  } = timerState
+  const resume = useCallback(() => {
+    isPausedRef.current = false
+  }, [])
 
   useEffect(() => {
-    if (!onNextPage) return
-    const total = digitsToSeconds(timerDigits || '000000')
-    setRemainingSeconds(total)
-    audioEnabledRef.current = true
-
-    const cdAudio = new Audio(AUDIO_PATHS.countdown)
-    cdAudio.currentTime = 0
-    countdownAudioRef.current = cdAudio
-
-    // TODO: pickMotivational will be used later
-    // let lastMotivationalImg: string | null = null
-    // const pickMotivational = () => {
-    //   const choices = motivationalImages.filter(img => img !== lastMotivationalImg)
-    //   const picked = choices[Math.floor(Math.random() * choices.length)]
-    //   lastMotivationalImg = picked
-    //   return picked
-    // }
-
-    let oneThirdTriggered = false
-    let twoThirdsTriggered = false
-    let countdownStarted = false
-
-    let remaining = total
+    let remaining = totalSeconds
     remainingRef.current = remaining
     isPausedRef.current = false
+    handlersRef.current.onStart?.(totalSeconds)
 
     const interval = setInterval(() => {
       if (isPausedRef.current) return
-      if (!twoThirdsTriggered && remaining <= total * (2 / 3)) {
-        twoThirdsTriggered = true
-        showMotivationalCallback()
-      }
 
-      if (!oneThirdTriggered && remaining <= total * (1 / 3)) {
-        oneThirdTriggered = true
-        showMotivationalCallback()
-      }
-      if (remaining === 10 && !countdownStarted && audioEnabledRef.current) {
-        countdownStarted = true
-        cdAudio.currentTime = 0
-        cdAudio.play()
-        isPausedRef.current = true
-        cdAudio.pause()
-        countdownWasPlayingRef.current = true
-        setShowWarning(true)
-        setTimeout(() => setWarningVisible(true), 20)
-        warningTimeoutRef.current = setTimeout(() => {
-          setWarningVisible(false)
-          isPausedRef.current = false
-          resumeCountdown()
-          setTimeout(() => setShowWarning(false), 400)
-        }, 3000)
-        return
-      }
-      if (!countdownStarted && remaining < 10 && remaining >= 1 && audioEnabledRef.current) {
-        countdownStarted = true
-        cdAudio.currentTime = Math.max(0, 10 - remaining)
-        cdAudio.play()
-      }
+      handlersRef.current.onTick?.(remaining, totalSeconds)
+      // A tick handler may pause the timer (e.g. the 10 second warning). That tick is not consumed.
+      if (isPausedRef.current) return
+
       if (remaining <= 1) {
         clearInterval(interval)
         intervalRef.current = null
+        remainingRef.current = 0
         setRemainingSeconds(0)
-        if (audioEnabledRef.current) {
-          const alarm = new Audio(AUDIO_PATHS.alarm)
-          alarmAudioRef.current = alarm
-          alarm.play()
-        }
+        handlersRef.current.onComplete?.()
         return
       }
+
       remaining -= 1
       remainingRef.current = remaining
       setRemainingSeconds(remaining)
-    }, 1000)
+    }, TICK_MS)
     intervalRef.current = interval
-    return () => { clearInterval(interval); intervalRef.current = null }
-  }, [onNextPage, timerDigits, setRemainingSeconds, setShowWarning, setWarningVisible, countdownAudioRef, alarmAudioRef, intervalRef, audioEnabledRef, remainingRef, isPausedRef, countdownWasPlayingRef, warningTimeoutRef, resumeCountdown, motivationalImages, showMotivationalCallback])
+
+    return () => {
+      clearInterval(interval)
+      intervalRef.current = null
+    }
+  }, [totalSeconds, handlersRef])
+
+  return { remainingSeconds, remainingRef, pause, resume, stop }
 }

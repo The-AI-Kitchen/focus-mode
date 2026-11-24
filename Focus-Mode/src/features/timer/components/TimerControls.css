@@ -1,0 +1,30 @@
+.timer-controls__exit {
+  position: absolute;
+  left: 43%;
+  top: 15%;
+  width: 2%;
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.timer-controls__finish {
+  position: absolute;
+  left: 55%;
+  top: 15%;
+  width: 13%;
+  cursor: pointer;
+}
+
+.timer-controls__break {
+  position: absolute;
+  left: 55.6%;
+  top: 22%;
+  width: 11.5%;
+  cursor: pointer;
+}
+
+.timer-controls__finish.is-disabled,
+.timer-controls__break.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

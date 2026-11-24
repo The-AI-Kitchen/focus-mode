@@ -1,0 +1,21 @@
+.confirmed-summary__section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmed-summary__heading {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.confirmed-summary__time {
+  padding: 18px 28px;
+  border-radius: 999px;
+  background-color: #c8c8c8;
+  font-size: 20px;
+  min-width: 200px;
+  text-align: center;
+}

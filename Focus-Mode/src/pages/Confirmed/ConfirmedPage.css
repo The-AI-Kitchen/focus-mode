@@ -1,0 +1,21 @@
+.confirmed-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 24px;
+}
+
+.confirmed-page__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirmed-page__next {
+  cursor: pointer;
+  height: 44px;
+  width: auto;
+}

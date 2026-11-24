@@ -1,0 +1,48 @@
+.image-modal.break-countdown {
+  z-index: 101;
+}
+
+.break-countdown__time {
+  position: absolute;
+  top: 57%;
+  left: 52%;
+  transform: translate(-50%, -50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 5vw;
+  font-weight: 400;
+  color: #222;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.break-countdown__relax,
+.break-countdown__time-up {
+  position: absolute;
+  left: 51%;
+  transform: translateX(-50%);
+  width: 70%;
+  transition: opacity 0.6s ease;
+}
+
+.break-countdown__relax {
+  top: 56%;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.break-countdown__relax.is-hidden {
+  opacity: 0;
+}
+
+.break-countdown__time-up {
+  top: 60%;
+  pointer-events: none;
+  cursor: default;
+  opacity: 0;
+}
+
+.break-countdown__time-up.is-active {
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 1;
+}

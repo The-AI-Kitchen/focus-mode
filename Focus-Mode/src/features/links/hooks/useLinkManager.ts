@@ -1,58 +1,27 @@
-import { useState, useEffect } from 'react'
-import { addLink, getLinks, removeLink, type LinkEntry } from '../db'
-import { isValidUrl, normalizeUrl } from '../utils/urlUtils'
+import { useState } from 'react'
+import { useLinkForm } from './useLinkForm'
+import { useLinks } from './useLinks'
 
+/**
+ * Link management for the session setup: the saved links, the add-link form,
+ * and whether the list is expanded on the home page.
+ */
 export function useLinkManager() {
-  const [linkInput, setLinkInput] = useState('')
-  const [linkError, setLinkError] = useState('')
-  const [links, setLinks] = useState<LinkEntry[]>([])
+  const { links, add, remove } = useLinks()
+  const form = useLinkForm({ links, addLink: add })
   const [showLinks, setShowLinks] = useState(false)
 
-  useEffect(() => {
-    getLinks().then((loaded) => setLinks(loaded)).catch(() => setLinks([]))
-  }, [])
-
-  useEffect(() => {
-    if (!linkError) return
-    const t = setTimeout(() => setLinkError(''), 3000)
-    return () => clearTimeout(t)
-  }, [linkError])
-
-  async function handleAddLink() {
-    const trimmed = linkInput.trim()
-    if (!trimmed) return
-    if (!isValidUrl(trimmed)) {
-      setLinkError('Please enter a valid URL (e.g. youtube.com)')
-      return
-    }
-    if (links.some(l => normalizeUrl(l.url) === normalizeUrl(trimmed))) {
-      setLinkError('This link has already been added')
-      return
-    }
-    setLinkError('')
-    await addLink(trimmed, normalizeUrl(trimmed))
-    setLinks(await getLinks())
-    setLinkInput('')
-  }
-
-  async function handleRemoveLink(id: string) {
-    await removeLink(id)
-    setLinks(await getLinks())
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') handleAddLink()
-  }
-
   return {
-    linkInput,
-    setLinkInput,
-    linkError,
     links,
+    linkInput: form.linkInput,
+    linkError: form.linkError,
     showLinks,
-    setShowLinks,
-    handleAddLink,
-    handleRemoveLink,
-    handleKeyDown,
+    setLinkInput: form.setLinkInput,
+    handleAddLink: form.handleAddLink,
+    handleKeyDown: form.handleKeyDown,
+    handleRemoveLink: remove,
+    toggleShowLinks: () => setShowLinks((prev) => !prev),
   }
 }
+
+export type LinkManager = ReturnType<typeof useLinkManager>

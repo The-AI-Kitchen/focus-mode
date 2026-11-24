@@ -1,78 +1,39 @@
-const LINKS_KEY = 'focus_mode_links'
-const TIMER_KEY = 'focus_mode_timer'
+/**
+ * Thin wrapper around `chrome.storage.local`.
+ * Every function degrades to a no-op when the app runs outside a Chrome extension.
+ */
 
-export interface LinkEntry {
-  id: string
-  url: string
-  siteName: string
-  accessedAt: number
+interface ChromeStorageArea {
+  get: (key: string, callback: (result: Record<string, unknown>) => void) => void
+  set: (items: Record<string, unknown>, callback: () => void) => void
 }
 
-function isChromeStorageAvailable(): boolean {
-  return typeof window !== 'undefined' && Boolean((window as any).chrome?.storage?.local)
+function getChromeStorage(): ChromeStorageArea | undefined {
+  if (typeof window === 'undefined') return undefined
+  const chromeApi = (window as unknown as { chrome?: { storage?: { local?: ChromeStorageArea } } }).chrome
+  return chromeApi?.storage?.local
 }
 
-function chromeStorageGet<T>(key: string): Promise<T | undefined> {
+export function isChromeStorageAvailable(): boolean {
+  return Boolean(getChromeStorage())
+}
+
+export function chromeStorageGet<T>(key: string): Promise<T | undefined> {
   return new Promise((resolve) => {
-    if (!isChromeStorageAvailable()) return resolve(undefined)
-    ;(window as any).chrome.storage.local.get(key, (result: any) => {
-      resolve(result?.[key])
+    const storage = getChromeStorage()
+    if (!storage) return resolve(undefined)
+    storage.get(key, (result) => {
+      resolve(result?.[key] as T | undefined)
     })
   })
 }
 
-function chromeStorageSet<T>(key: string, value: T): Promise<void> {
+export function chromeStorageSet<T>(key: string, value: T): Promise<void> {
   return new Promise((resolve) => {
-    if (!isChromeStorageAvailable()) return resolve()
-    ;(window as any).chrome.storage.local.set({ [key]: value }, () => {
+    const storage = getChromeStorage()
+    if (!storage) return resolve()
+    storage.set({ [key]: value }, () => {
       resolve()
     })
   })
-}
-
-async function loadLinks(): Promise<LinkEntry[]> {
-  const chromeStored = await chromeStorageGet<LinkEntry[]>(LINKS_KEY)
-  if (chromeStored !== undefined) return chromeStored
-
-  try {
-    const raw = localStorage.getItem(LINKS_KEY)
-    return raw ? (JSON.parse(raw) as LinkEntry[]) : []
-  } catch {
-    return []
-  }
-}
-
-async function saveLinks(links: LinkEntry[]): Promise<void> {
-  await chromeStorageSet(LINKS_KEY, links)
-  localStorage.setItem(LINKS_KEY, JSON.stringify(links))
-}
-
-export async function addLink(url: string, siteName: string): Promise<LinkEntry> {
-  const entry: LinkEntry = {
-    id: crypto.randomUUID(),
-    url: url.trim(),
-    siteName: siteName.trim(),
-    accessedAt: Date.now(),
-  }
-  const links = await loadLinks()
-  links.push(entry)
-  await saveLinks(links)
-  return entry
-}
-
-export async function getLinks(): Promise<LinkEntry[]> {
-  return loadLinks()
-}
-
-export async function removeLink(id: string): Promise<void> {
-  const links = (await loadLinks()).filter((l) => l.id !== id)
-  await saveLinks(links)
-}
-
-export function saveTimer(digits: string): void {
-  localStorage.setItem(TIMER_KEY, digits)
-}
-
-export function loadTimer(): string {
-  return localStorage.getItem(TIMER_KEY) ?? ''
 }

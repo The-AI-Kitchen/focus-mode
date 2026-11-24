@@ -1,0 +1,14 @@
+.motivational-popup {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  width: 12%;
+}
+
+.motivational-popup--in {
+  animation: donutPopIn 0.4s ease-out forwards;
+}
+
+.motivational-popup--out {
+  animation: donutPopOut 0.7s ease-in forwards;
+}
