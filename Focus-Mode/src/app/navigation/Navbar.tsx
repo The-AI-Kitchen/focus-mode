@@ -20,7 +20,7 @@ export function Navbar() {
         <NavLink className={({ isActive }) => isActive ? "navbar__link active" : "navbar__link"} to={PATHS.productivity}>
           Site tracker
         </NavLink>
-        <NavLink className={({ isActive }) => isActive ? "navbar__link active" : "navbar__link"} to={PATHS.confirmed}>
+        <NavLink className={({ isActive }) => isActive ? "navbar__link active" : "navbar__link"} to={PATHS.confirmation}>
           Lock in sesh
         </NavLink>
       </div>

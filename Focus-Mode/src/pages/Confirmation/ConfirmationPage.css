@@ -1,0 +1,9 @@
+.confirmation-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  min-height: calc(100vh - var(--navbar-height));
+  padding-top: 8vh;
+}

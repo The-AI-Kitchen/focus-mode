@@ -1,6 +1,7 @@
 /** URL paths for every page in the app. */
 export const PATHS = {
   home: '/',
+  confirmation: '/confirmation',
   confirmed: '/confirmed',
   timer: '/timer',
   productivity: '/productivity',

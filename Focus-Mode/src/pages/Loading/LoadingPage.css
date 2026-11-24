@@ -1,0 +1,25 @@
+.loading-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.loading-page__spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(0, 0, 0, 0.15);
+  border-top-color: #0097b2;
+  border-radius: 50%;
+  animation: loadingSpin 0.8s linear infinite;
+}
+
+.loading-page__text {
+  font-size: 1.2rem;
+}
+
+@keyframes loadingSpin {
+  to { transform: rotate(360deg); }
+}

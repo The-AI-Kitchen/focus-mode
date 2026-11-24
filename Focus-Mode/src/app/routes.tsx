@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import type { LinkManager } from '../features/links/hooks/useLinkManager'
+import { ConfirmationPage } from '../pages/Confirmation/ConfirmationPage'
 import { ConfirmedPage } from '../pages/Confirmed/ConfirmedPage'
 import { HomePage } from '../pages/Home/HomePage'
 import { ProductivityPage } from '../pages/Productivity/ProductivityPage'
@@ -25,11 +26,19 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
           path={PATHS.home}
           element={
             <HomePage
+              onStartSession={() => navigate(PATHS.confirmation)}
+              onOpenProductivity={() => navigate(PATHS.productivity)}
+            />
+          }
+        />
+        <Route
+          path={PATHS.confirmation}
+          element={
+            <ConfirmationPage
               timerDigits={timerDigits}
               onTimerKeyDown={onTimerKeyDown}
               linkManager={linkManager}
               onConfirmed={() => navigate(PATHS.confirmed)}
-              onOpenProductivity={() => navigate(PATHS.productivity)}
             />
           }
         />
@@ -39,7 +48,7 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
             <ConfirmedPage
               timerDigits={timerDigits}
               links={linkManager.links}
-              onGoBack={() => navigate(PATHS.home)}
+              onGoBack={() => navigate(PATHS.confirmation)}
               onStart={() => navigate(PATHS.timer)}
             />
           }
