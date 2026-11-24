@@ -21,7 +21,7 @@
   justify-content: space-around;
   gap: 2rem;
   /* Basis 0 + min-width 0: width comes only from the flex ratio, never from the logo or buttons. */
-  flex: 1 1 0;
+  flex: 1.5 1 0;
   min-width: 0;
   container-type: inline-size;
 
