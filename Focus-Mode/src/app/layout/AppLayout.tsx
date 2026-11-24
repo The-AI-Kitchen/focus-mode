@@ -13,8 +13,14 @@ export function AppLayout() {
 
   return (
     <>
-      <Navbar />
-      <main className="app-layout__content">{isLoading ? <LoadingPage /> : <Outlet />}</main>
+      {isLoading ? <LoadingPage /> : <>
+        <Navbar /> 
+          <main className="app-layout__content"> 
+            <Outlet/>
+          </main>
+        </>}
+      {/*<Navbar />
+      <main className="app-layout__content">{isLoading ? <LoadingPage /> : <Outlet />}</main>*/}
     </>
   )
 }

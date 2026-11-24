@@ -1,4 +1,5 @@
 .navbar {
+  position: relative; /* change this to absolute for user to always see navbar when scrolling */
   display: flex;
   justify-content: space-between;
   align-content: center;
@@ -76,4 +77,18 @@
 .navbar__link:hover {
     color: var(--light-yellow);
     font-weight: 700;
+}
+
+.navbar::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: calc(var(--navbar-height) - 3px);
+  left: 0;
+  width: 56%;
+  height: 1.75vh;
+  background: var(--sunset-orange);
+
+  width: 0;
+  animation: expandBar 1s ease-in-out forwards;
 }
