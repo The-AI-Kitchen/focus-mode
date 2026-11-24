@@ -29,7 +29,7 @@
   font-weight: 650;
   letter-spacing: -0.01em;
   font-style: normal;
-  font-size: 0.95rem;
+  font-size: 1.075rem;
   line-height: 2rem;
   color: #ffffff;
   text-decoration: none;
@@ -86,7 +86,7 @@
   top: calc(var(--navbar-height) - 3px);
   left: 0;
   width: 56%;
-  height: 1.75vh;
+  height: 0.67em;
   background: var(--sunset-orange);
 
   width: 0;

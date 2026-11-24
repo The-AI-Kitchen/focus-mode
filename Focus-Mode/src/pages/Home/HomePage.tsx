@@ -18,14 +18,14 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
               text="Start lock in sesh!"
               style={{ background: 'var(--btn-gradient-green)', 
                 border: '4px solid transparent', color: '#fff', 
-                fontWeight: '650', fontSize: '1em'}}
+                fontWeight: '650', fontSize: '1.33em'}}
               onClick={onStartSession}
             />
             <PillButton
               text="My Study AI Helper"
               style={{ background: 'none', 
                 border: '4px solid #fff', color: '#fff', 
-                fontWeight: '650', fontSize: '1em', width: 'fit-content', height: 'fit-content'}}
+                fontWeight: '650', fontSize: '1.33em', width: 'fit-content', height: 'fit-content'}}
               onClick={onOpenProductivity}
             />
           </div>
@@ -33,9 +33,10 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
         <div className="quoteofday">
           <div className="quoteContainer">
             <h2 className="title">Quote of the Day</h2>
-            <p className="quote">"The secret of getting ahead is getting started."</p>
+            <p className="quote">"If you're reading this, I hope you 
+              become tomorrow what you LARP today."</p>
             {/*<img className="fancyLine" src={homePage} alt="Line graphic" />*/}
-            <p className="author">- Mark Twain</p>
+            <p className="author">- Mahatama Gandhi, 1867</p>
           </div>
           {/*<img className="quoteImage" src={homePage} alt="Study Graphics" />*/}
         </div>
