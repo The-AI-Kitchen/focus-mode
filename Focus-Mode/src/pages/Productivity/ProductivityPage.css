@@ -35,6 +35,7 @@
   align-items: center;
   padding: 2rem 1.5rem;
   border-radius: 0;
+  max-width: 330px;
   overflow-y: hidden;
   white-space: normal;
 }
@@ -63,7 +64,7 @@
   margin: 2rem 0 0;
   font-family: var(--alfa-slab-one);
   font-weight: 400;
-  font-size: clamp(1rem,1.4rem,1.75rem);
+  font-size: clamp(1.5rem,1.75rem,2rem);
   color: var(--all-nighter-blue);
 }
 
@@ -78,8 +79,7 @@
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
- 
+  align-content: center;
   gap: 1.25rem;
   padding-left: 1rem;
 }
@@ -89,7 +89,7 @@
   border: none;
   padding: 0;
   font-family: var(--lilita-one);
-  font-size: 1em;
+  font-size: 1.2em;
   text-align: left;
   color: var(--all-nighter-blue);
   cursor: pointer;
@@ -102,7 +102,7 @@
 
 .productivity-page__sidebar-image {
   width: 75%;
-  max-width: 130px;
+  max-width: 200px;
   margin-top: auto;
   padding-top: 1.5rem;
 }
