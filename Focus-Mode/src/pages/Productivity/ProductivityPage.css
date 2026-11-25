@@ -16,6 +16,7 @@
   box-sizing: border-box;
 }
 
+/*to delete */
 .pill-button.productivity-page__back {
   position: fixed;
   bottom: 24px;
@@ -139,10 +140,38 @@
   flex: 0 0 7.5%;
 }
 
+.productivity-page__sidebar-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--flunk-red);
+  color: #ffffff;
+  font-family: var(--lilita-one);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .productivity-page__sidebar-open {
-  background: var(--light-yelow);
-  width: 3em;
-  height: 3em;
+  border: none;
+  cursor: pointer;
+  background: var(--light-yellow);
+  margin-left: 1rem;
+  border-radius: 50%;
+  min-width: 3rem;
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.productivity-page__sidebar-open>p {
+  font-family: var(--lilita-one);
+  color: var(--all-nighter-blue);
+  font-weight: bolder;
+  font-size: 1.5em;
 }
 
 .pill-button.productivity-page__toolbar-button {

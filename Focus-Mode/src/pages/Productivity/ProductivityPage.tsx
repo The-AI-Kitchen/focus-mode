@@ -63,7 +63,9 @@ export function ProductivityPage({ onBack }: ProductivityPageProps) {
                 className="productivity-page__sidebar-open"
                 aria-label="Open dashboard menu"
                 onClick={()=>setMenuOpen(true)}
-              />
+              >
+                <p>{">>"}</p>
+                </button>
             </div>
           )} 
           <div className="productivity-page__toolbar">
