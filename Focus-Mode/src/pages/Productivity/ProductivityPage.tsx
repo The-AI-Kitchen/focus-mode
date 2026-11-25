@@ -55,9 +55,21 @@ export function ProductivityPage({ onBack }: ProductivityPageProps) {
       )}
 
       <div className="productivity-page__main">
-        <div className="productivity-page__toolbar">
-          <PillButton className="productivity-page__toolbar-button">Choose date</PillButton>
-          <PillButton className="productivity-page__toolbar-button">View by V</PillButton>
+        <div className="productivity-page__toolbar-container">
+          {!menuOpen && (
+            <div className="productivity-page__sidebar-open-container">
+              <button 
+                type="button"
+                className="productivity-page__sidebar-open"
+                aria-label="Open dashboard menu"
+                onClick={()=>setMenuOpen(true)}
+              />
+            </div>
+          )} 
+          <div className="productivity-page__toolbar">
+            <PillButton className="productivity-page__toolbar-button">Choose date</PillButton>
+            <PillButton className="productivity-page__toolbar-button">View by V</PillButton>
+          </div>
         </div>
         <div className="productivity-page__content">
       {page.statView === 'list' ? (

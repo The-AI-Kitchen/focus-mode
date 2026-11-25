@@ -114,12 +114,35 @@
   flex-direction: column;
 }
 
+.productivity-page__toolbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--sky-blue);
+}
+
 .productivity-page__toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: var(--sky-blue);
+  flex-grow: 1;
+}
+
+.productivity-page__sidebar-open-container {
+  display: flex;
+  box-sizing: border-box;
+  justify-content: center;
+  align-content: center;
+  padding: 0.6rem;
+  min-width: 7.5%;
+  flex: 0 0 7.5%;
+}
+
+.productivity-page__sidebar-open {
+  background: var(--light-yelow);
+  width: 3em;
+  height: 3em;
 }
 
 .pill-button.productivity-page__toolbar-button {
