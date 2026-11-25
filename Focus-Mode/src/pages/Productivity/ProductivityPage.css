@@ -78,7 +78,7 @@
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
  
   gap: 1.25rem;
   padding-left: 1rem;
@@ -124,12 +124,12 @@
 
 .pill-button.productivity-page__toolbar-button {
   background: none;
-  border: var(--btn-whiteborder);
-  border-radius: 1.25rem;
+  border: 3px solid white;
+  border-radius: 8px;
   padding: 0.5rem 2rem;
   font-family: var(--atkinson-hyperlegible);
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: #ffffff;
 }
 
