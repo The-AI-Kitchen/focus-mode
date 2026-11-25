@@ -1,0 +1,21 @@
+.sidemenu {
+  display: flex;
+  box-sizing: border-box;
+  
+  padding: 2rem 3rem;
+  border-radius: 999px;
+  border: none;
+
+  white-space: nowrap;
+  transition: filter 0.15s ease;
+}
+
+/*.pill-button:hover:not(:disabled):not(.is-disabled) {
+  filter: brightness(1.1);
+}
+
+.pill-button.is-disabled,
+.pill-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}*/
