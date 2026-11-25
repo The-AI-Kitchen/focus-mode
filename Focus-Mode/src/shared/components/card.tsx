@@ -12,12 +12,9 @@ interface CardProps extends Omit<ComponentPropsWithoutRef<'div'>, 'style'> {
    */
   styleOutside?: {
     background?: string
-    width?: string
-    height?: string
   }
   styleInside?: {
     border?: string
-    padding?: string
   }
 }
 
