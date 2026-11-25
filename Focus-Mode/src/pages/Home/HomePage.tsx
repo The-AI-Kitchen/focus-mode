@@ -1,5 +1,6 @@
 import homePage from '../../assets/home-page.png'
 import { PillButton } from '../../shared/components/PillButton'
+import { StripedBg } from '../../shared/components/stripedbg'
 import './HomePage.css'
 
 interface HomePageProps {
@@ -11,25 +12,28 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
   return (
     <div className="home-page page-fade-in">
       <div className="home-page__hero">
-        <div className="logoandbtns">
-          <img className="logo" src={homePage} alt="Focus Mode Logo" />
-          <div className="home-page__actions">
-            <PillButton
-              text="Start lock in sesh!"
-              style={{ background: 'var(--btn-gradient-green)', 
-                border: '4px solid transparent', color: '#fff', 
-                fontWeight: '650', fontSize: '1.33em'}}
-              onClick={onStartSession}
-            />
-            <PillButton
-              text="My Study AI Helper"
-              style={{ background: 'none', 
-                border: '4px solid #fff', color: '#fff', 
-                fontWeight: '650', fontSize: '1.33em', width: 'fit-content', height: 'fit-content'}}
-              onClick={onOpenProductivity}
-            />
-          </div>
-        </div>
+        <StripedBg className = "logoandbtns" color = "--focusmode-blue" transparency = "95">
+          
+            <img className="logo" src={homePage} alt="Focus Mode Logo" />
+            <div className="home-page__actions">
+              <PillButton
+                text="Start lock in sesh!"
+                style={{ background: 'var(--btn-gradient-green)', 
+                  border: '4px solid transparent', color: '#fff', 
+                  fontWeight: '650', fontSize: '1.33em'}}
+                onClick={onStartSession}
+              />
+              <PillButton
+                text="My Study AI Helper"
+                style={{ background: 'none', 
+                  border: '4px solid #fff', color: '#fff', 
+                  fontWeight: '650', fontSize: '1.33em', width: 'fit-content', height: 'fit-content'}}
+                onClick={onOpenProductivity}
+              />
+              
+            </div>
+        
+          </StripedBg>
         <div className="quoteofday">
           <div className="quoteContainer">
             <h2 className="title">Quote of the Day</h2>
