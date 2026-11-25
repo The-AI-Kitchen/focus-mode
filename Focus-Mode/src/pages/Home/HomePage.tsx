@@ -20,14 +20,14 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
                 text="Start lock in sesh!"
                 style={{ background: 'var(--btn-gradient-green)', 
                   border: '4px solid transparent', color: '#fff', 
-                  fontWeight: '650', fontSize: '1.33em'}}
+                  fontWeight: '650', fontSize: 'clamp(0.5em, 5vh, 1.33em)'}}
                 onClick={onStartSession}
               />
               <PillButton
                 text="My Study AI Helper"
                 style={{ background: 'none', 
                   border: '4px solid #fff', color: '#fff', 
-                  fontWeight: '650', fontSize: '1.33em', width: 'fit-content', height: 'fit-content'}}
+                  fontWeight: '650', fontSize: 'clamp(0.5em, 5vh, 1.33em)', width: 'fit-content', height: 'fit-content'}}
                 onClick={onOpenProductivity}
               />
               
