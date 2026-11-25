@@ -5,6 +5,7 @@ export const PATHS = {
   confirmed: '/confirmed',
   timer: '/timer',
   settings: '/settings',
+  settingsAppearance: '/settings/appearance',
   productivity: '/productivity',
   productivityWeekly: '/productivity/weekly',
   productivityDaily: '/productivity/daily',

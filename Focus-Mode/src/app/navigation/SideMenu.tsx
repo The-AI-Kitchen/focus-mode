@@ -8,6 +8,8 @@ const SIDE_MENU_TABS: { label: string; path?: string }[] = [
   { label: 'Log In' },
   { label: 'Sign Up' },
   { label: 'Settings', path: PATHS.settings },
+  { label: 'My Profile', path: PATHS.settings },
+  { label: 'Study Goals', path: PATHS.settings },
 ]
 
 /** Right-hand menu opened by the navbar's hamburger button. */
@@ -23,7 +25,9 @@ export function SideMenu({ onClose }: { onClose: () => void }) {
             <NavLink
               key={tab.label}
               to={tab.path}
-              className={({ isActive }) => (isActive ? 'side-menu__item is-active' : 'side-menu__item')}
+              className={({ isActive }) =>
+                isActive && tab.label === 'Settings' ? 'side-menu__item is-active' : 'side-menu__item'
+              }
             >
               {tab.label}
             </NavLink>

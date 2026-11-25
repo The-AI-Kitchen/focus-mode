@@ -6,6 +6,7 @@ import { ConfirmedPage } from '../pages/Confirmed/ConfirmedPage'
 import { HomePage } from '../pages/Home/HomePage'
 import { ProductivityPage } from '../pages/Productivity/ProductivityPage'
 import { SettingsPage } from '../pages/Settings/settings'
+import { Appearance } from '../pages/Settings/settingsRoutes/Appearance'
 import { TimerPage } from '../pages/Timer/TimerPage'
 import { DailyOverview } from '../pages/Productivity/dashboardRoutes/DailyOverview'
 import { MyStudyHabits } from '../pages/Productivity/dashboardRoutes/MyStudyHabits'
@@ -64,10 +65,10 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
           path={PATHS.timer}
           element={<TimerPage timerDigits={timerDigits} onExit={() => navigate(PATHS.home)} />}
         />
-        <Route
-          path = {PATHS.settings}
-          element={<SettingsPage/>}
-        />
+        <Route path={PATHS.settings} element={<SettingsPage />}>
+          <Route index element={<div className="productivity-page__view" />} />
+          <Route path={PATHS.settingsAppearance} element={<Appearance />} />
+        </Route>
         <Route path={PATHS.productivity} element={<ProductivityPage />}>
           <Route index element={<Navigate to={PATHS.productivityWeekly} replace />} />
           <Route path={PATHS.productivityWeekly} element={<WeeklyOverview />} />
