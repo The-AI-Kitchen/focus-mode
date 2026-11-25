@@ -16,15 +16,6 @@
   box-sizing: border-box;
 }
 
-/*to delete */
-.pill-button.productivity-page__back {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 28px;
-  z-index: 10;
-}
 .productivity-page {
   display: flex;
 }

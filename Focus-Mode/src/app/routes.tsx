@@ -1,10 +1,16 @@
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import type { LinkManager } from '../features/links/hooks/useLinkManager'
+
 import { ConfirmationPage } from '../pages/Confirmation/ConfirmationPage'
 import { ConfirmedPage } from '../pages/Confirmed/ConfirmedPage'
 import { HomePage } from '../pages/Home/HomePage'
 import { ProductivityPage } from '../pages/Productivity/ProductivityPage'
 import { TimerPage } from '../pages/Timer/TimerPage'
+import { DailyOverview } from '../pages/Productivity/dashboardRoutes/DailyOverview'
+import { MyStudyHabits } from '../pages/Productivity/dashboardRoutes/MyStudyHabits'
+import { WeeklyOverview } from '../pages/Productivity/dashboardRoutes/WeeklyOverview'
+
+
 import { AppLayout } from './layout/AppLayout'
 import { PATHS } from './navigation/paths'
 
@@ -57,7 +63,12 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
           path={PATHS.timer}
           element={<TimerPage timerDigits={timerDigits} onExit={() => navigate(PATHS.home)} />}
         />
-        <Route path={PATHS.productivity} element={<ProductivityPage onBack={() => navigate(PATHS.home)} />} />
+        <Route path={PATHS.productivity} element={<ProductivityPage />}>
+          <Route index element={<Navigate to={PATHS.productivityWeekly} replace />} />
+          <Route path={PATHS.productivityWeekly} element={<WeeklyOverview />} />
+          <Route path={PATHS.productivityDaily} element={<DailyOverview />} />
+          <Route path={PATHS.productivityHabits} element={<MyStudyHabits />} />
+        </Route>
         <Route path="*" element={<Navigate to={PATHS.home} replace />} />
       </Route>
     </Routes>
