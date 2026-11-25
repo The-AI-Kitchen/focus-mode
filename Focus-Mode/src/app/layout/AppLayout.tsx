@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { LoadingPage } from '../../pages/Loading/LoadingPage'
 import { Navbar } from '../navigation/Navbar'
@@ -13,6 +13,10 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const isLoading = useRouteLoading(pathname)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(()=>(
+    setMenuOpen(false)
+  ),[pathname])
 
   return isLoading ? (
     <LoadingPage />
