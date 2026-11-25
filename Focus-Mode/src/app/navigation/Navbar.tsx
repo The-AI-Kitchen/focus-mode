@@ -3,10 +3,15 @@ import HamburgerButton from './assets/hamburgerbtn.png'
 import { PATHS } from './paths'
 import './Navbar.css'
 
-/** Site-wide navigation bar. */
-export function Navbar() {
-  
+interface NavbarProps {
+  /** Whether the side menu is open. */
+  menuOpen: boolean
+  /** Called when the hamburger button is pressed. */
+  onMenuToggle: () => void
+}
 
+/** Site-wide navigation bar. */
+export function Navbar({ menuOpen, onMenuToggle }: NavbarProps) {
   return (
     <nav className="navbar">
       <div className="navbar__links">
@@ -24,9 +29,15 @@ export function Navbar() {
           Lock in sesh
         </NavLink>
       </div>
-      <div className="nav_button_container">  
-        <button type="button" className="navbar-hamburger-button" aria-label="Menu">
-            <img id = "hamburgerbtn"src={HamburgerButton} alt="Navigation button" />
+      <div className="nav_button_container">
+        <button
+          type="button"
+          className="navbar-hamburger-button"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onClick={onMenuToggle}
+        >
+          <img id="hamburgerbtn" src={HamburgerButton} alt="Navigation button" />
         </button>
       </div>
     </nav>
