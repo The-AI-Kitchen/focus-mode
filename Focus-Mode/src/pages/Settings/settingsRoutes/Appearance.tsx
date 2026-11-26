@@ -23,7 +23,7 @@ export function Appearance() {
       <h2>{isDark ? 'Light Mode' : 'Dark Mode'} (coming soon!)</h2>
     </button>
 
-    /*Nice to have feature of a blue light filter - gives all colors a warmer tone. */
+    {/*Nice to have feature of a blue light filter - gives all colors a warmer tone. */}
     <button
     type="button"
     className='dark__mode-btn'
