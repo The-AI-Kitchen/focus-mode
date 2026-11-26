@@ -1,4 +1,5 @@
 import homePage from '../../assets/home-page.png'
+import logo from '../../assets/logo.png'
 import { PillButton } from '../../shared/components/PillButton'
 import { StripedBg } from '../../shared/components/stripedbg'
 import { FancyDivider } from '../../shared/components/fancydivider'
@@ -15,7 +16,7 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
       <div className="home-page__hero">
         <StripedBg className = "logoandbtns" color = "--focusmode-blue" transparency = "95">
           
-            <img className="logo" src={homePage} alt="Focus Mode Logo" />
+            <img className="logo" src={logo} alt="Focus Mode Logo" />
             <div className="home-page__actions">
               <PillButton
                 text="Start lock in sesh!"
@@ -35,13 +36,13 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
             </div>
         
           </StripedBg>
+
         <div className="quoteofday">
           <div className="quoteContainer">
             <h2 className="title">Quote of the Day</h2>
             <p className="quote">"If you're reading this, I hope you 
               become tomorrow what you LARP today."</p>
             <FancyDivider id = "divider" size={30} color = "var(--bright-yellow)" lineWeight = "4px"></FancyDivider>
-            {/*<img className="fancyLine" src={homePage} alt="Line graphic" />*/}
             <p className="author">- Mahatama Gandhi, 1867</p>
           </div>
           {/*<img className="quoteImage" src={homePage} alt="Study Graphics" />*/}

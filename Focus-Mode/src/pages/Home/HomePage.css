@@ -5,6 +5,7 @@
   align-items: stretch;
   min-height: 50vh;
   background-image: url(../../assets/lightMode_homepg_bg.png);
+  background-size: cover;
   box-sizing: border-box;
   max-width: 100%;
 
