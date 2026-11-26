@@ -15,7 +15,6 @@
   
 }
 
-
 .logoandbtns {
   display: flex;
   flex-direction: column;
@@ -31,15 +30,15 @@
 }
 
 .logo {
-  min-width: 0;
-  min-height: 0;
-  width: 80%;
-  height: 80%;
+  min-width: 60%;
+  min-height: 60%;
+  max-width: 65%;
+  max-height: 65%;
   object-fit: contain;
   align-self: center;
+  padding-top: 3vh;
   
-  padding-bottom: 2vh;
-  border-bottom: 2px solid yellow;
+  
 }
 
 .home-page__actions {
@@ -54,6 +53,8 @@
   font-size: clamp(0.75rem, 2.4cqw, 1.5rem);
   margin-bottom: 1rem;
   gap: 16px;
+  padding-top: 5vh;
+  border-top: 2px solid yellow;
 }
 
 .quoteofday {
@@ -69,6 +70,8 @@
   justify-content: center;
   background: var(--focusmode-blue);
   border-radius: 0;
+  background-image: url(../../assets/study-icon.png);
+  background-size: cover;
 }
 
 .quoteContainer{

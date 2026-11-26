@@ -1,4 +1,4 @@
-import homePage from '../../assets/home-page.png'
+
 import logo from '../../assets/logo.png'
 import { PillButton } from '../../shared/components/PillButton'
 import { StripedBg } from '../../shared/components/stripedbg'
