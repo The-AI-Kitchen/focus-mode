@@ -3,9 +3,24 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  height: 100vh;
+  height: 100%;
   min-height: calc(100vh - var(--navbar-height));
-  background: var(--sky-blue);
+  background-color: var(--sky-blue);
+  --tile-size: 280px;
+
+  background-image:
+    linear-gradient(to right, var(--sky-blue) 12px, transparent 12px),
+    linear-gradient(to bottom, var(--sky-blue) 12px, transparent 12px),
+
+    conic-gradient(
+      color-mix(in srgb, var(--focusmode-blue), transparent 88%) 90deg,
+      color-mix(in srgb, #ffffff, transparent 88%) 90deg 180deg,
+      color-mix(in srgb, var(--focusmode-blue), transparent 88%) 180deg 270deg,
+      color-mix(in srgb, #ffffff, transparent 88%) 270deg
+    );
+  background-size: calc(var(--tile-size) / 2) calc(var(--tile-size) / 2),
+    calc(var(--tile-size) / 2) calc(var(--tile-size) / 2),
+    var(--tile-size) var(--tile-size);
 }
 
 .loading-page__left {
@@ -14,11 +29,11 @@
   align-content: center;
   justify-content: space-around;
   align-items: center;
-  flex: 1 1 0;
+  flex: 0.5 0.5 0;
   padding: 5vh 5vw;
   height: 100%;
   gap: 1.5vh;
-  margin-left: 5vw;
+  margin-left: 3vw;
 }
 
 .loading-page__percent-container {
@@ -110,4 +125,51 @@
   bottom: 0;
   right: 0;
   border-width: 0 4px 4px 0;
+}
+
+.loading-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 3vw; /* Distance from the right edge */
+  width: 75px; /* Total width of the chevron column */
+  height: 100vh;
+  
+  background-image: 
+    /* Left half of the chevron (angled up-left) */
+    repeating-linear-gradient(
+      -30deg,
+      #102c44 0px,
+      #102c44 24px,
+      transparent 24px,
+      transparent 32px
+    ),
+    /* Right half of the chevron (angled down-left) */
+    repeating-linear-gradient(
+      30deg,
+      #102c44 0px,
+      #102c44 24px,
+      transparent 24px,
+      transparent 32px
+    );
+    
+  /* Make each gradient take up half the width and repeat vertically */
+  background-size: 50% 36.95px; 
+  background-position: left top, right top;
+  background-repeat: repeat-y;
+  
+  /* Keeps the pattern behind your content */
+  z-index: 1; 
+  pointer-events: none;
+
+  animation: scrollChevron 2.1s linear infinite;
+}
+
+@keyframes scrollChevron {
+  0% {
+    background-position: 0 0, 100% 0;
+  }
+  100% {
+    background-position: 0 -36.95px, 100% -36.95px;
+  }
 }
