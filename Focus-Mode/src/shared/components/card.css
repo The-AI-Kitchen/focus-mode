@@ -1,9 +1,25 @@
-.card {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-}
+.card__container::before {
+  content: "";
+  position: absolute;
+  /* insetX controls left/right margin; insetY controls top/bottom margin */
+  inset: var(--inset-y) var(--inset-x);
+  pointer-events: none;
+  z-index: -1;
 
-.card__container {
-  display: flex;
+  --r: var(--inner-radius);
+  --w: 3px; /* border thickness */
+  --c: var(--border-color);
+
+  background:
+    /* 4 Quarter-Circle Scooped Corners */
+    radial-gradient(circle at 0 0, transparent calc(var(--r) - 0.5px), var(--c) var(--r), var(--c) calc(var(--r) + var(--w)), transparent calc(var(--r) + var(--w) + 0.5px)) top left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), var(--c) var(--r), var(--c) calc(var(--r) + var(--w)), transparent calc(var(--r) + var(--w) + 0.5px)) top right / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), var(--c) var(--r), var(--c) calc(var(--r) + var(--w)), transparent calc(var(--r) + var(--w) + 0.5px)) bottom right / 51% 51% no-repeat,
+    radial-gradient(circle at 0 100%, transparent calc(var(--r) - 0.5px), var(--c) var(--r), var(--c) calc(var(--r) + var(--w)), transparent calc(var(--r) + var(--w) + 0.5px)) bottom left / 51% 51% no-repeat,
+
+    /* 4 Straight Edges connecting the tangent points */
+    linear-gradient(var(--c), var(--c)) top center / calc(100% - var(--r) * 2) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom center / calc(100% - var(--r) * 2) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) left center / var(--w) calc(100% - var(--r) * 2) no-repeat,
+    linear-gradient(var(--c), var(--c)) right center / var(--w) calc(100% - var(--r) * 2) no-repeat;
 }

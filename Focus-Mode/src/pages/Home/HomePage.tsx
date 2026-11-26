@@ -40,7 +40,7 @@ export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) 
             <h2 className="title">Quote of the Day</h2>
             <p className="quote">"If you're reading this, I hope you 
               become tomorrow what you LARP today."</p>
-            <FancyDivider id = "divider" size={16} color = "var(--bright-yellow)" lineWeight = "4px"></FancyDivider>
+            <FancyDivider id = "divider" size={30} color = "var(--bright-yellow)" lineWeight = "4px"></FancyDivider>
             {/*<img className="fancyLine" src={homePage} alt="Line graphic" />*/}
             <p className="author">- Mahatama Gandhi, 1867</p>
           </div>

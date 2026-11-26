@@ -1,6 +1,7 @@
 import { StripedBg } from '../../shared/components/stripedbg'
 import { Card } from '../../shared/components/card'
 import './LoadingPage.css'
+import { FancyDivider } from '../../shared/components/fancydivider';
 
 /** Shown while a route is loading. */
 export function LoadingPage() {
@@ -15,10 +16,10 @@ export function LoadingPage() {
             <h3>{`${LoadingPercent}%`}</h3>
           </StripedBg>
         </div>
-        <Card styleOutside={{background: "var(--focusmode-blue)"}} 
-        styleInside={{border: "4px solid var(--bright-yellow)" }}>
+        <Card color = "var(--focusmode-blue)" borderColor= "var(--bright-yellow)" insetX="1.25%" insetY="1.25%">
           <h2>Study Tip:</h2>
           {/*<img></img> divider here*/}
+          <FancyDivider size={24} color='var(--bright-yellow)' lineWeight='4px'/>
           <p>If you are in ECEN 50 you are in the trenches 
             and must fight your way out.
           </p>
