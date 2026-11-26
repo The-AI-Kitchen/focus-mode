@@ -7,13 +7,12 @@ export function LightMode() {
     return (
         <div className="light-mode-page">
             <div className="light-mode-main">
-                <h2>Good morning!</h2>
-                <h3>Entering Daytime Mode...</h3>
+                <div className="light-mode-page-text">
+                    <h2 className="light-mode-title">Good morning!</h2>
+                    <h3 className="light-mode-text">Entering Daytime Mode...</h3>
+                </div>
+                <button type="button" onClick={() => navigate(PATHS.settingsAppearance)}>Back</button>
             </div>
-            <button type="button" onClick={() => navigate(PATHS.settingsAppearance)}>Back</button>
         </div>
-        
-
     )
 }
-

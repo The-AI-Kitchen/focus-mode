@@ -1,0 +1,111 @@
+.dark-mode-page {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    --sunset-color-top: #ff7b00;
+    --sunset-color-center: #dc45c5;
+    --sunset-color-bottom: #67e2bd;
+    background: linear-gradient(180deg,
+        var(--all-nighter-blue) 0%,
+        #4c0f42 50%,
+        #773b19 100%
+    );
+}
+
+.dark-mode-main {
+    display: flex;
+    box-sizing: border-box;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 20vh 15% 10vh 15%;
+    flex-direction: column;
+    flex-grow: 1;
+    
+}
+
+.retro-sunset {
+    display: block;
+    width: 28vh;
+    height: 28vh;
+    flex-shrink: 0;
+}
+
+.sunset-stop-top { stop-color: var(--sunset-color-top); }
+.sunset-stop-center { stop-color: var(--sunset-color-center); }
+.sunset-stop-bottom { stop-color: var(--sunset-color-bottom); }
+
+#retro-sunset-mask .stripe {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: sunset 3.2s linear infinite;
+}
+.dark-mode-page-text {
+    display: flex;
+    width: fit-content;
+    margin-top: 5vh;
+    height: fit-content;
+    flex-direction: column;
+    justify-content: space-evenly;
+    
+}
+
+.dark-mode-title {
+    font-family: var(--alfa-slab-one);
+    color: var(--light-yellow);
+    font-size: clamp(1.25rem, 1.67rem, 2rem);
+    text-align: center;
+}
+
+.dark-mode-text {
+    font-family: var(--atkinson-hyperlegible);
+    color: var(--sunset-orange);
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.japanese {
+    display: flex;
+    flex-grow: 0;
+    flex-basis: 30px;
+    align-items: flex-start;
+    margin: 10px 10px 0 0;
+}
+
+.japanese_text {
+    font-family: sans-serif;
+    color: var(--sunset-orange);
+    font-weight: 1.25rem;
+    text-shadow: -0.05rem -0.05rem 0.5px magenta, 0.05rem 0.05rem 0.5px cyan;
+}
+
+@keyframes sunset {
+    /* Stripe top = 40 + translateY, height = 5.5 * scaleY (viewBox units).
+       Stripes grow linearly, so translateY follows 41.3t + 18.7t^2 (t = progress)
+       to keep the gap between stripes constant. Intermediate stops approximate
+       that curve with linear segments. */
+    0% {
+        transform: translateY(0) scaleY(0.15);
+        opacity: 0;
+    }
+    8% {
+        opacity: 1;
+    }
+    25% {
+        transform: translateY(11.5px) scaleY(0.3625);
+    }
+    50% {
+        transform: translateY(25.3px) scaleY(0.575);
+    }
+    75% {
+        transform: translateY(41.5px) scaleY(0.7875);
+    }
+    100% {
+        transform: translateY(60px) scaleY(1);
+        opacity: 1;
+    }
+}
