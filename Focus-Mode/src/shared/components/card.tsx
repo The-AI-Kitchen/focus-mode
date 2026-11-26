@@ -31,12 +31,12 @@ const corner = (color: string, radius: number, at: string) =>
 
 export function Card({ color = '#2bb3f6', borderColor = '#ffffff', insetX = '2.5%', insetY = '1.25%', children, ...rest }: CardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const [cornerRadius, setCornerRadius] = useState(10)
+  const [cornerRadius, setCornerRadius] = useState(15)
   const offset = cornerRadius * 0.25
-  const innerRadius = Math.max(0, cornerRadius - offset)
+  const innerRadius = cornerRadius
 
   // Corner radius is 10% of the card's total height, so it is re-measured on resize.
-  useLayoutEffect(() => {
+  /*useLayoutEffect(() => {
     const el = cardRef.current
     if (!el) return
     const update = () => {
@@ -44,13 +44,13 @@ export function Card({ color = '#2bb3f6', borderColor = '#ffffff', insetX = '2.5
       if (h > 0) {
         setCornerRadius(h * CORNER_RADIUS_RATIO)
       }
-      else {setCornerRadius(10)}
+      else {setCornerRadius(15)}
     }
     update()
     const observer = new ResizeObserver(update)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [])*/
 
   return (
     <div

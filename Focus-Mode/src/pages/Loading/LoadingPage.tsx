@@ -16,7 +16,7 @@ export function LoadingPage() {
             <h3>{`${LoadingPercent}%`}</h3>
           </StripedBg>
         </div>
-        <Card className = "loading-page__study-tip" color = "var(--focusmode-blue)" borderColor= "var(--light-blue)" insetX="1.25%" insetY="1.25%">
+        <Card className = "loading-page__study-tip" color = "var(--focusmode-blue)" borderColor= "var(--light-blue)" insetX="2.5%" insetY="1.25%">
           <h2>Study Tip:</h2>
           {/*<img></img> divider here*/}
           <FancyDivider size={24} color='var(--light-blue)' lineWeight='4px'/>
