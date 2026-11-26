@@ -54,7 +54,7 @@ export function Card({ color = '#2bb3f6', borderColor = '#ffffff', insetX = '2.5
 
   return (
     <div
-      {...rest}
+      
       ref={cardRef}
       className='card'
       style={{
@@ -80,12 +80,12 @@ export function Card({ color = '#2bb3f6', borderColor = '#ffffff', insetX = '2.5
         backgroundSize: '51% 51%',
         backgroundRepeat: 'no-repeat',
       } as CSSProperties}
+      {...rest}
     >
       <div
         className='card__container'
         style={{
           position: 'relative',
-          padding: '2.5rem 2rem 3rem',
           textAlign: 'center',
           zIndex: 1,
           

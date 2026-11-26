@@ -1,25 +1,113 @@
 .loading-page {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 16px;
+  height: 100vh;
   min-height: calc(100vh - var(--navbar-height));
+  background: var(--sky-blue);
 }
 
-.loading-page__spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid rgba(0, 0, 0, 0.15);
-  border-top-color: #0097b2;
-  border-radius: 50%;
-  animation: loadingSpin 0.8s linear infinite;
+.loading-page__left {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: space-around;
+  align-items: center;
+  flex: 1 1 0;
+  padding: 5vh 5vw;
+  height: 100%;
+  gap: 1.5vh;
+  margin-left: 5vw;
 }
 
-.loading-page__text {
-  font-size: 1.2rem;
+.loading-page__percent-container {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-content: center;
+  padding: 10%;
+  width: 100%;
+  height: 100%;
+  margin-top: 5vh;
 }
 
-@keyframes loadingSpin {
-  to { transform: rotate(360deg); }
+.percent__bg {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.loading-page__percent-container h2 {
+  font-family: var(--lilita-one);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--all-nighter-blue);
+  text-align: center;
+  margin-top: 10%;
+}
+
+.loading-page__percent-container h3 {
+  font-family: var(--lilita-one);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--sunset-orange);
+  text-align: center;
+}
+
+.loading-page__study-tip .card__container {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: space-between;
+  padding: 10% 17.5% 15%;
+}
+
+.loading-page__study-tip h2 {
+  font-family: var(--alfa-slab-one);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--bright-yellow);
+  text-align: center;
+  margin-bottom: 5%;
+}
+
+.loading-page__study-tip p {
+  font-family: var(--comic-sans);
+  font-size: 1.25rem;
+  font-weight: bolder;
+  color: var(--all-nighter-blue);
+  text-align: center;
+  margin-top: 5%;
+}
+
+.loading-page__right {
+  display: flex;
+  flex: 1 1 0;
+}
+
+.loading-page__percent-container::before, 
+.loading-page__percent-container::after {
+  content: "";
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  border-color: var(--light-blue);
+  border-style: solid;
+
+}
+
+.loading-page__percent-container::before {
+  top: 0;
+  left: 0;
+  border-width: 4px 0 0 4px;
+}
+
+.loading-page__percent-container::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 4px 4px 0;
 }

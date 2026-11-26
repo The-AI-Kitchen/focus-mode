@@ -11,15 +11,15 @@ export function LoadingPage() {
     <div className="loading-page" role="status" aria-live="polite">
       <div className="loading-page__left">
         <div className="loading-page__percent-container">
-          <StripedBg color="--focusmode-blue" transparency="85">
+          <StripedBg className = "percent__bg" color="--focusmode-blue" transparency="85">
             <h2>Loading...</h2>
             <h3>{`${LoadingPercent}%`}</h3>
           </StripedBg>
         </div>
-        <Card color = "var(--focusmode-blue)" borderColor= "var(--bright-yellow)" insetX="1.25%" insetY="1.25%">
+        <Card className = "loading-page__study-tip" color = "var(--focusmode-blue)" borderColor= "var(--light-blue)" insetX="1.25%" insetY="1.25%">
           <h2>Study Tip:</h2>
           {/*<img></img> divider here*/}
-          <FancyDivider size={24} color='var(--bright-yellow)' lineWeight='4px'/>
+          <FancyDivider size={24} color='var(--light-blue)' lineWeight='4px'/>
           <p>If you are in ECEN 50 you are in the trenches 
             and must fight your way out.
           </p>
