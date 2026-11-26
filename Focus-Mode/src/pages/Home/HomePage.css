@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: stretch;
   min-height: 50vh;
-
+  background-image: url(../../assets/lightMode_homepg_bg.png);
   box-sizing: border-box;
   max-width: 100%;
 
@@ -20,7 +20,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  gap: 2rem;
+  gap: 5vh;
   /* Basis 0 + min-width 0: width comes only from the flex ratio, never from the logo or buttons. */
   flex: 1.15 1 0;
   min-width: 0;
@@ -64,7 +64,7 @@
   box-sizing: border-box;
 
   padding: 10px;
-  
+  height: 80%;
   justify-content: center;
   background: var(--focusmode-blue);
   border-radius: 0;
@@ -85,29 +85,29 @@
 }
 
 .title {
-  margin: 1rem 1.5rem 0;
+  margin: 7.5% 1.5rem 0;
   font-family: var(--alfa-slab-one);
   text-align: center;
   color: #ffffff;
-  font-size: 1.5rem;
+  font-size: clamp(1rem,1.25rem,1.5rem);
   font-weight: bold;
 }
 
 .quote {
-  margin: 0 3rem;
+  margin: 0 15%;
   font-family: var(--comic-sans);
   text-align: center;
   color: #ffffff;
-  font-size: 1.25rem;
+  font-size: clamp(0.75rem,1rem,1.25rem);
   font-weight: 600;
 }
 
 .author {
-  margin: 0 1.5rem 1rem;
+  margin: 0 15% 7.5%;
   font-family: var(--comic-sans-bold);
   text-align: center;
   color: var(--light-yellow);
-  font-size: 1.25rem;
+  font-size: clamp(0.75rem,1rem,1.25rem);
   font-weight: 600;
 }
 

@@ -23,6 +23,9 @@
   --sunset-purple: #c597e4;
   --flunk-red: #551b18;
 
+/* colors dark */
+
+
   --light-bg-gradient: linear-gradient(135deg, var(--light-blue) 0%, 
   var(--sky-blue) 50%, var(--sunset-purple) 100%);
 
