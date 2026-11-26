@@ -20,7 +20,7 @@ export function Appearance() {
     className="dark__mode-btn"
     onClick={handleToggle}
     >
-      <h2>{isDark ? 'Light Mode' : 'Dark Mode'} (coming soon!)</h2>
+      <h2>{isDark ? 'Light Mode' : 'Dark Mode'}</h2>
     </button>
 
     {/*Nice to have feature of a blue light filter - gives all colors a warmer tone. */}
@@ -28,7 +28,7 @@ export function Appearance() {
     type="button"
     className='dark__mode-btn'
     style={{marginLeft: "10px"}}>
-      <h2>Blue light filter</h2>
+      <h2>Blue light filter (coming soon!)</h2>
     </button>
   </div>
 }
