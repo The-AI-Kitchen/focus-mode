@@ -7,6 +7,8 @@ import { HomePage } from '../pages/Home/HomePage'
 import { ProductivityPage } from '../pages/Productivity/ProductivityPage'
 import { SettingsPage } from '../pages/Settings/settings'
 import { Appearance } from '../pages/Settings/settingsRoutes/Appearance'
+import { DarkMode } from '../pages/changingAppearance/darkMode'
+import { LightMode } from '../pages/changingAppearance/lightMode'
 import { TimerPage } from '../pages/Timer/TimerPage'
 import { DailyOverview } from '../pages/Productivity/dashboardRoutes/DailyOverview'
 import { MyStudyHabits } from '../pages/Productivity/dashboardRoutes/MyStudyHabits'
@@ -69,6 +71,8 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
           <Route index element={<div className="productivity-page__view" />} />
           <Route path={PATHS.settingsAppearance} element={<Appearance />} />
         </Route>
+        <Route path={PATHS.darkMode} element={<DarkMode />} />
+        <Route path={PATHS.lightMode} element={<LightMode />} />
         <Route path={PATHS.productivity} element={<ProductivityPage />}>
           <Route index element={<Navigate to={PATHS.productivityWeekly} replace />} />
           <Route path={PATHS.productivityWeekly} element={<WeeklyOverview />} />
@@ -80,3 +84,5 @@ export function AppRoutes({ timerDigits, onTimerKeyDown, linkManager }: AppRoute
     </Routes>
   )
 }
+
+

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { LoadingPage } from '../../pages/Loading/LoadingPage'
+import { PATHS } from '../navigation/paths'
+import { AppearanceContext, type AppearanceMode } from './appearanceContext'
 import { Navbar } from '../navigation/Navbar'
 import { SideMenu } from '../navigation/SideMenu'
 import { usePageBackground } from './usePageBackground'
@@ -13,16 +15,20 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const isLoading = useRouteLoading(pathname)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mode, setMode] = useState<AppearanceMode>('light')
+  const hideNavbar = pathname === PATHS.darkMode || pathname === PATHS.lightMode
 
   useEffect(()=>(
     setMenuOpen(false)
   ),[pathname])
 
-  return isLoading ? (
+  return (
+    <AppearanceContext.Provider value={{ mode, setMode }}>
+    {isLoading ? (
     <LoadingPage />
   ) : (
     <>
-      <Navbar menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />
+      {!hideNavbar && <Navbar menuOpen={menuOpen} onMenuToggle={() => setMenuOpen((open) => !open)} />}
       <div className="app-layout__body">
         <main className="app-layout__content">
           <Outlet />
@@ -30,5 +36,8 @@ export function AppLayout() {
         {menuOpen && <SideMenu onClose={() => setMenuOpen(false)} />}
       </div>
     </>
+  )}
+    </AppearanceContext.Provider>
   )
 }
+

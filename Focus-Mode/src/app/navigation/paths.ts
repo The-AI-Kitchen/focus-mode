@@ -10,6 +10,8 @@ export const PATHS = {
   productivityWeekly: '/productivity/weekly',
   productivityDaily: '/productivity/daily',
   productivityHabits: '/productivity/habits',
+  darkMode: '/darkmode',
+  lightMode: '/lightmode'
 } as const
 
 /** Pages that use the teal page background instead of the default one. */
