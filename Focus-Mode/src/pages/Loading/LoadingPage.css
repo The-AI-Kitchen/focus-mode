@@ -5,12 +5,14 @@
   gap: 16px;
   height: 100vh;
   min-height: calc(100% - var(--navbar-height));
-  background-color: var(--sky-blue);
+  --grid-gap-color: var(--sky-blue);
+  --chevron-color: #102c44;
+  background-color: var(--grid-gap-color);
   --tile-size: 280px;
   overflow: hidden;
   background-image:
-    linear-gradient(to right, var(--sky-blue) 12px, transparent 12px),
-    linear-gradient(to bottom, var(--sky-blue) 12px, transparent 12px),
+    linear-gradient(to right, var(--grid-gap-color) 12px, transparent 12px),
+    linear-gradient(to bottom, var(--grid-gap-color) 12px, transparent 12px),
 
     conic-gradient(
       color-mix(in srgb, var(--focusmode-blue), transparent 88%) 90deg,
@@ -147,16 +149,16 @@
     /* Left half of the chevron (angled up-left) */
     repeating-linear-gradient(
       -30deg,
-      #102c44 0px,
-      #102c44 24px,
+      var(--chevron-color) 0px,
+      var(--chevron-color) 24px,
       transparent 24px,
       transparent 32px
     ),
     /* Right half of the chevron (angled down-left) */
     repeating-linear-gradient(
       30deg,
-      #102c44 0px,
-      #102c44 24px,
+      var(--chevron-color) 0px,
+      var(--chevron-color) 24px,
       transparent 24px,
       transparent 32px
     );
@@ -180,4 +182,27 @@
   100% {
     background-position: 0 -36.95px, 100% -36.95px;
   }
+}
+
+/* ---- Dark mode ---- */
+:root[data-theme='dark'] .loading-page {
+  --grid-gap-color: var(--all-nighter-blue);
+  --chevron-color: var(--light-blue);
+}
+
+:root[data-theme='dark'] .loading-page__percent-container h2 {
+  color: var(--light-blue);
+}
+
+:root[data-theme='dark'] .loading-page__percent-container::before,
+:root[data-theme='dark'] .loading-page__percent-container::after {
+  border-color: var(--bright-yellow);
+}
+
+:root[data-theme='dark'] .loading-page__study-tip h2 {
+  color: var(--light-yellow);
+}
+
+:root[data-theme='dark'] .loading-page__study-tip p {
+  color: var(--light-blue);
 }

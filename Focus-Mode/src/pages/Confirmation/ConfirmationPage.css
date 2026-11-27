@@ -19,3 +19,13 @@
   color: #c0392b;
   font-size: 14px;
 }
+
+/* ---- Dark mode: to be filled in ---- */
+:root[data-theme='dark'] .confirmation-page {
+}
+
+:root[data-theme='dark'] .confirmation-page__confirm {
+}
+
+:root[data-theme='dark'] .confirmation-page__error {
+}

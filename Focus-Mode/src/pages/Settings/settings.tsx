@@ -5,6 +5,7 @@ import { MenuSide } from '../../shared/components/menuside'
 
 // Reuses the dashboard shell styles from the productivity page.
 import '../Productivity/ProductivityPage.css'
+import './settings.css'
 
 /** Sidebar entries. Items without `path` do nothing when clicked. `activePath` highlights the item. */
 const SETTINGS_TABS: { label: string; path?: string; activePath?: string }[] = [

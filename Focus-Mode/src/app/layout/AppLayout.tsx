@@ -22,6 +22,11 @@ export function AppLayout() {
     setMenuOpen(false)
   ),[pathname])
 
+  // Dark mode styles are keyed off this attribute: :root[data-theme='dark'] ...
+  useEffect(() => {
+    document.documentElement.dataset.theme = mode
+  }, [mode])
+
   return (
     <AppearanceContext.Provider value={{ mode, setMode }}>
     {isLoading ? (

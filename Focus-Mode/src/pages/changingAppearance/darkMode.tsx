@@ -1,9 +1,16 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PATHS } from '../../app/navigation/paths'
 import './darkMode.css'
 
 export function DarkMode() {
     const navigate = useNavigate()
+
+    // Show this page for one second, then return to the appearance settings.
+    useEffect(() => {
+        const t = setTimeout(() => navigate(PATHS.settingsAppearance, { replace: true }), 1000)
+        return () => clearTimeout(t)
+    }, [navigate])
     const STRIPE_DELAYS:number[] = [];
     for(let i:number = 0; i < 8; i++) {
         STRIPE_DELAYS.push(i*(-0.4))

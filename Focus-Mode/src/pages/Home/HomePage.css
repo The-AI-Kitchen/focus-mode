@@ -164,3 +164,16 @@
   width: 47%;
   align-self: center;
 }
+/* ---- Dark mode ---- */
+:root[data-theme='dark'] .home-page__hero {
+  background-image: url(../../assets/background-dark-mode.png);
+}
+
+:root[data-theme='dark'] .quoteofday {
+  background-color: var(--all-nighter-blue);
+}
+
+:root[data-theme='dark'] .samplesection,
+:root[data-theme='dark'] .samplecontainer {
+  background: var(--all-nighter-blue);
+}

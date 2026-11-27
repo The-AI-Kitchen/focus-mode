@@ -190,3 +190,45 @@
 .productivity-page__content .productivity-header__text {
   color: var(--all-nighter-blue);
 }
+
+/* ---- Dark mode (also applies to Settings, which reuses this shell) ---- */
+:root[data-theme='dark'] .productivity-page {
+  background-color: #000000;
+}
+
+/* !important: the sidebar background is set inline by the page component */
+:root[data-theme='dark'] .sidemenu.productivity-page__sidebar {
+  background: var(--gaming-sesh-purple) !important;
+}
+
+:root[data-theme='dark'] .productivity-page__sidebar-close {
+  background: var(--bright-red);
+}
+
+:root[data-theme='dark'] .productivity-page__sidebar-title,
+:root[data-theme='dark'] .productivity-page__sidebar-item,
+:root[data-theme='dark'] .productivity-page__content .productivity-header__text {
+  color: var(--light-blue);
+}
+
+:root[data-theme='dark'] .productivity-page__sidebar-item.is-active,
+:root[data-theme='dark'] .productivity-page__sidebar-item:hover {
+  color: var(--focusmode-blue);
+}
+
+:root[data-theme='dark'] .productivity-page__toolbar-container {
+  background: var(--navy-blue);
+}
+
+:root[data-theme='dark'] .pill-button.productivity-page__toolbar-button {
+  background: var(--all-nighter-blue);
+  border-color: #ffffff;
+}
+
+:root[data-theme='dark'] .productivity-page__sidebar-open {
+  background: var(--gaming-sesh-purple);
+}
+
+:root[data-theme='dark'] .productivity-page__sidebar-open > p {
+  color: var(--light-blue);
+}

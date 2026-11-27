@@ -3,6 +3,7 @@ import logo from '../../assets/logo.png'
 import { PillButton } from '../../shared/components/PillButton'
 import { StripedBg } from '../../shared/components/stripedbg'
 import { FancyDivider } from '../../shared/components/fancydivider'
+import { useAppearance } from '../../app/layout/appearanceContext'
 import './HomePage.css'
 
 interface HomePageProps {
@@ -11,10 +12,12 @@ interface HomePageProps {
 }
 
 export function HomePage({ onStartSession, onOpenProductivity }: HomePageProps) {
+  const { mode } = useAppearance()
+  const stripeColor = mode === 'dark' ? '--all-nighter-blue' : '--focusmode-blue'
   return (
     <div className="home-page page-fade-in">
       <div className="home-page__hero">
-        <StripedBg className = "logoandbtns" color = "--focusmode-blue" transparency = "95">
+        <StripedBg className = "logoandbtns" color = {stripeColor} transparency = "95">
           
             <img className="logo" src={logo} alt="Focus Mode Logo" />
             <div className="home-page__actions">

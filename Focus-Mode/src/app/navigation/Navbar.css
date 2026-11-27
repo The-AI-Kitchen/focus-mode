@@ -95,3 +95,21 @@
   width: 0;
   animation: expandBar 1s ease-in-out forwards;
 }
+/* ---- Dark mode ---- */
+:root[data-theme='dark'] .navbar {
+  background: var(--navbar-gradient-dark);
+}
+
+:root[data-theme='dark'] .navbar__links,
+:root[data-theme='dark'] .nav_button_container {
+  background: none;
+}
+
+:root[data-theme='dark'] .navbar__link {
+  color: #ffffff;
+}
+
+:root[data-theme='dark'] .navbar__link.active,
+:root[data-theme='dark'] .navbar__link:hover {
+  color: var(--sky-blue);
+}

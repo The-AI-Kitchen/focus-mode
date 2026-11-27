@@ -70,3 +70,23 @@
 .side-menu__item:hover {
   color: var(--focusmode-blue);
 }
+
+/* ---- Dark mode ---- */
+/* !important: the background is set inline by SideMenu.tsx */
+:root[data-theme='dark'] .sidemenu.side-menu {
+  background: var(--gaming-sesh-purple) !important;
+}
+
+:root[data-theme='dark'] .side-menu__close {
+  background: var(--bright-red);
+}
+
+:root[data-theme='dark'] .side-menu__title,
+:root[data-theme='dark'] .side-menu__item {
+  color: var(--light-blue);
+}
+
+:root[data-theme='dark'] .side-menu__item.is-active,
+:root[data-theme='dark'] .side-menu__item:hover {
+  color: var(--focusmode-blue);
+}
