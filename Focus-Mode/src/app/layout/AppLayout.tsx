@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { LoadingPage } from '../../pages/Loading/LoadingPage'
 import { PATHS } from '../navigation/paths'
 import { AppearanceContext, type AppearanceMode } from './appearanceContext'
+import { loadAppearance, saveAppearance } from './appearanceStorage'
 import { Navbar } from '../navigation/Navbar'
 import { SideMenu } from '../navigation/SideMenu'
 import { usePageBackground } from './usePageBackground'
@@ -15,8 +16,13 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const isLoading = useRouteLoading(pathname)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [mode, setMode] = useState<AppearanceMode>('light')
+  const [mode, setMode] = useState<AppearanceMode>(loadAppearance)
   const hideNavbar = pathname === PATHS.darkMode || pathname === PATHS.lightMode
+
+  const changeMode = (next: AppearanceMode) => {
+    setMode(next)
+    saveAppearance(next)
+  }
 
   useEffect(()=>(
     setMenuOpen(false)
@@ -28,7 +34,7 @@ export function AppLayout() {
   }, [mode])
 
   return (
-    <AppearanceContext.Provider value={{ mode, setMode }}>
+    <AppearanceContext.Provider value={{ mode, setMode: changeMode }}>
     {isLoading ? (
     <LoadingPage />
   ) : (
