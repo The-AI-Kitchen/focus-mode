@@ -49,8 +49,6 @@ export function DarkMode() {
                     <h3 className="dark-mode-text">Good luck on your lock-in sesh!</h3>
                     
                 </div>
-                <button type="button" onClick={() => navigate(PATHS.settingsAppearance)}>Back</button>
-        
             </div>
             <div className="japanese">
                 <h2 className="japanese_text">しゅうちゅうする</h2>
